@@ -7,7 +7,10 @@ authors = [
     { name = "anttarch", email = "ynotnaziul@gmail.com" }
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "fastapi[standard]>=0.150.0",
+    "sqlalchemy>=2.1.5",
+]
 
 [project.scripts]
 backend = "backend:main"
