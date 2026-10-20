@@ -69,19 +69,20 @@ def update_incident(db: SessionDep, incident_id: int, incident_update: IncidentU
         )
 
     new_data = incident_update.model_dump(exclude_unset=True)
+    new_data["version"] = incident_update.version + 1
     stmt = (
         update(Incident)
         .where(Incident.id == incident_id, Incident.version == incident_update.version)
         .values(new_data)
+        .returning(Incident)
     )
 
-    did_change = db.execute(stmt)
+    changed = db.execute(stmt).scalar()
 
-    if did_change == 0:
+    if not changed:
         raise HTTPException(
             status_code=HTTPStatus.CONFLICT, detail="Incident is outdated"
         )
 
     db.commit()
-    updated = db.get(Incident, incident_id)
-    return IncidentResponse.model_validate(updated).model_dump(mode="json")
+    return IncidentResponse.model_validate(changed).model_dump(mode="json")
