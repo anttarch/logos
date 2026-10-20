@@ -15,7 +15,7 @@ class IncidentBase(BaseModel):
 
 
 # pra GET
-class IncidentRead(IncidentBase):
+class IncidentResponse(IncidentBase):
     model_config = {
         "from_attributes": True
     }  # permite que o pydantic valide direto aparentemente

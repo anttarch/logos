@@ -10,7 +10,7 @@ from ..schemas import (
     Criticality,
     IncidentCategory,
     IncidentCreate,
-    IncidentRead,
+    IncidentResponse,
     IncidentStatus,
     IncidentUpdate,
 )
@@ -18,7 +18,7 @@ from ..schemas import (
 router = APIRouter(prefix="/incidents", tags=["incidents"])
 
 
-@router.get("/")
+@router.get("/", response_model=list[IncidentResponse])
 def get_incidents(
     db: SessionDep,
     category: IncidentCategory | None = None,
@@ -44,11 +44,9 @@ def get_incidents(
 
     incidents = db.execute(query).scalars().all()
 
-    return {
-        "incidents": [
-            IncidentRead.model_validate(i).model_dump(mode="json") for i in incidents
-        ]
-    }
+    return [
+        IncidentResponse.model_validate(i).model_dump(mode="json") for i in incidents
+    ]
 
 
 @router.post("/", status_code=HTTPStatus.CREATED)
@@ -58,7 +56,7 @@ def create_incident(db: SessionDep, incident_create: IncidentCreate):
     db.commit()
 
 
-@router.patch("/{incident_id}")
+@router.patch("/{incident_id}", response_model=IncidentResponse)
 def update_incident(db: SessionDep, incident_id: int, incident_update: IncidentUpdate):
     incident = db.query(exists().where(Incident.id == incident_id)).scalar()
     if not incident:
@@ -82,4 +80,4 @@ def update_incident(db: SessionDep, incident_id: int, incident_update: IncidentU
 
     db.commit()
     updated = db.get(Incident, incident_id)
-    return IncidentRead.model_validate(updated).model_dump(mode="json")
+    return IncidentResponse.model_validate(updated).model_dump(mode="json")
