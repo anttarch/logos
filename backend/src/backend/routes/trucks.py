@@ -16,11 +16,13 @@ def get_trucks(db: SessionDep):
     return [TruckResponse.model_validate(t).model_dump(mode="json") for t in trucks]
 
 
-@router.post("/", status_code=HTTPStatus.CREATED)
+@router.post("/", status_code=HTTPStatus.CREATED, response_model=TruckResponse)
 def create_truck(db: SessionDep, truck_create: TruckCreate):
     truck = Truck(**truck_create.model_dump())
     db.add(truck)
     db.commit()
+    db.refresh(truck)
+    return TruckResponse.model_validate(truck).model_dump(mode="json")
 
 
 @router.patch(
