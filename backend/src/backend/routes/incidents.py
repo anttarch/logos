@@ -1,4 +1,4 @@
-from typing import Annotated
+from http import HTTPStatus
 
 from fastapi import APIRouter
 from sqlalchemy import case as sql_case
@@ -6,7 +6,13 @@ from sqlalchemy import select
 
 from ..database import SessionDep
 from ..models.incident import Incident
-from ..schemas import Criticality, IncidentCategory, IncidentRead, IncidentStatus
+from ..schemas import (
+    Criticality,
+    IncidentCategory,
+    IncidentCreate,
+    IncidentRead,
+    IncidentStatus,
+)
 
 router = APIRouter(prefix="/incidents", tags=["incidents"])
 
@@ -38,3 +44,10 @@ def get_incidents(
     incidents = db.execute(query).scalars().all()
 
     return {"incidents": [IncidentRead.model_validate(i) for i in incidents]}
+
+
+@router.post("/", status_code=HTTPStatus.CREATED)
+def create_incident(db: SessionDep, incident_create: IncidentCreate):
+    incident = Incident(**incident_create.model_dump())
+    db.add(incident)
+    db.commit()
