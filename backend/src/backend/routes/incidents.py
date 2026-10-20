@@ -68,7 +68,7 @@ def update_incident(db: SessionDep, incident_id: int, incident_update: IncidentU
             status_code=HTTPStatus.NOT_FOUND, detail="Incident not found"
         )
 
-    new_data = incident_update.model_dump(exclude_unset=True)
+    new_data = incident_update.model_dump(exclude_unset=True, exclude_none=True)
     new_data["version"] = incident_update.version + 1
     stmt = (
         update(Incident)
