@@ -49,11 +49,13 @@ def get_incidents(
     ]
 
 
-@router.post("/", status_code=HTTPStatus.CREATED)
+@router.post("/", status_code=HTTPStatus.CREATED, response_model=IncidentResponse)
 def create_incident(db: SessionDep, incident_create: IncidentCreate):
     incident = Incident(**incident_create.model_dump())
     db.add(incident)
     db.commit()
+    db.refresh(incident)
+    return IncidentResponse.model_validate(incident).model_dump(mode="json")
 
 
 @router.patch(
