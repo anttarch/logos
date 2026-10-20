@@ -12,6 +12,7 @@ class IncidentBase(BaseModel):
     title: str = Field(min_length=1, max_length=255)
     description: str | None = None
     location: str | None = Field(None, max_length=255)
+    truck_id: int
 
 
 # pra GET

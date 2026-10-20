@@ -1,8 +1,9 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, Integer, String, Text
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy import Enum as DBEnum
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..schemas.enums import Criticality, IncidentCategory, IncidentStatus
 from .base import Base, utcnow
@@ -40,6 +41,19 @@ class Incident(Base):
     title: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     location: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+    truck_id: Mapped[int] = mapped_column(
+        ForeignKey("trucks.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    if TYPE_CHECKING:
+        from .truck import Truck
+
+    truck: Mapped[Truck] = relationship(
+        "Truck",
+        back_populates="incidents",
+    )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,

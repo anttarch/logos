@@ -1,7 +1,8 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, utcnow
 
@@ -27,4 +28,13 @@ class Truck(Base):
         default=utcnow(),
         onupdate=utcnow(),
         nullable=False,
+    )
+
+    if TYPE_CHECKING:
+        from .incident import Incident
+
+    incidents: Mapped[list[Incident]] = relationship(
+        "Incident",
+        back_populates="truck",
+        cascade="all, delete-orphan",
     )
