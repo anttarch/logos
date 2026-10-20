@@ -5,7 +5,7 @@ from sqlalchemy import case as sql_case
 from sqlalchemy import exists, select, update
 
 from ..database import SessionDep
-from ..models.incident import Incident
+from ..models import Incident, Truck
 from ..schemas import (
     Criticality,
     IncidentCategory,
@@ -49,8 +49,17 @@ def get_incidents(
     ]
 
 
-@router.post("/", status_code=HTTPStatus.CREATED, response_model=IncidentResponse)
+@router.post(
+    "/",
+    status_code=HTTPStatus.CREATED,
+    response_model=IncidentResponse,
+    responses={HTTPStatus.NOT_FOUND: {}},
+)
 def create_incident(db: SessionDep, incident_create: IncidentCreate):
+    truck = db.query(exists().where(Truck.id == incident_create.truck_id)).scalar()
+    if not truck:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Truck not found")
+
     incident = Incident(**incident_create.model_dump())
     db.add(incident)
     db.commit()
