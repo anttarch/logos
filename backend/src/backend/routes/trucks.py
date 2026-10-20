@@ -16,8 +16,19 @@ def get_trucks(db: SessionDep):
     return [TruckResponse.model_validate(t).model_dump(mode="json") for t in trucks]
 
 
-@router.post("/", status_code=HTTPStatus.CREATED, response_model=TruckResponse)
+@router.post(
+    "/",
+    status_code=HTTPStatus.CREATED,
+    response_model=TruckResponse,
+    responses={HTTPStatus.CONFLICT: {}},
+)
 def create_truck(db: SessionDep, truck_create: TruckCreate):
+    plate = db.query(exists().where(Truck.plate == truck_create.plate)).scalar()
+    if plate:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT, detail="Plate already exists"
+        )
+
     truck = Truck(**truck_create.model_dump())
     db.add(truck)
     db.commit()
@@ -26,7 +37,9 @@ def create_truck(db: SessionDep, truck_create: TruckCreate):
 
 
 @router.patch(
-    "/{truck_id}", response_model=TruckResponse, responses={HTTPStatus.NOT_FOUND: {}}
+    "/{truck_id}",
+    response_model=TruckResponse,
+    responses={HTTPStatus.NOT_FOUND: {}},
 )
 def update_truck(db: SessionDep, truck_id: int, truck_update: TruckUpdate):
     truck = db.query(exists().where(Truck.id == truck_id)).scalar()
