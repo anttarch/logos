@@ -1,7 +1,9 @@
 import os
+from typing import Annotated
 
+from fastapi import Depends
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 from .models.base import Base
 
@@ -25,8 +27,11 @@ def init_db() -> None:
 
 
 def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    with SessionLocal() as db:
+        try:
+            yield db
+        finally:
+            db.close()
+
+
+SessionDep = Annotated[Session, Depends(get_db)]
