@@ -1,5 +1,6 @@
 from .enums import Criticality, IncidentCategory, IncidentStatus
 from .incident import IncidentCreate, IncidentResponse, IncidentUpdate
+from .truck import TruckCreate, TruckResponse, TruckUpdate
 
 __all__ = [
     "Criticality",
@@ -8,4 +9,7 @@ __all__ = [
     "IncidentResponse",
     "IncidentStatus",
     "IncidentUpdate",
+    "TruckCreate",
+    "TruckResponse",
+    "TruckUpdate",
 ]
