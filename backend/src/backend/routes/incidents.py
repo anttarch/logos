@@ -56,7 +56,11 @@ def create_incident(db: SessionDep, incident_create: IncidentCreate):
     db.commit()
 
 
-@router.patch("/{incident_id}", response_model=IncidentResponse)
+@router.patch(
+    "/{incident_id}",
+    response_model=IncidentResponse,
+    responses={HTTPStatus.NOT_FOUND: {}, HTTPStatus.CONFLICT: {}},
+)
 def update_incident(db: SessionDep, incident_id: int, incident_update: IncidentUpdate):
     incident = db.query(exists().where(Incident.id == incident_id)).scalar()
     if not incident:
