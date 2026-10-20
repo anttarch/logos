@@ -31,7 +31,7 @@ def update_truck(db: SessionDep, truck_id: int, truck_update: TruckUpdate):
     if not truck:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Truck not found")
 
-    new_data = truck_update.model_dump(exclude_none=True)
+    new_data = truck_update.model_dump(exclude_unset=True)
     stmt = update(Truck).where(Truck.id == truck_id).values(new_data).returning(Truck)
 
     changed = db.execute(stmt).scalar_one()
