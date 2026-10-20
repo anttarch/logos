@@ -43,7 +43,11 @@ def get_incidents(
 
     incidents = db.execute(query).scalars().all()
 
-    return {"incidents": [IncidentRead.model_validate(i) for i in incidents]}
+    return {
+        "incidents": [
+            IncidentRead.model_validate(i).model_dump(mode="json") for i in incidents
+        ]
+    }
 
 
 @router.post("/", status_code=HTTPStatus.CREATED)
