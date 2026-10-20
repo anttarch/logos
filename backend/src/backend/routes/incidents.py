@@ -1,8 +1,8 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from sqlalchemy import case as sql_case
-from sqlalchemy import select
+from sqlalchemy import exists, select, update
 
 from ..database import SessionDep
 from ..models.incident import Incident
@@ -12,6 +12,7 @@ from ..schemas import (
     IncidentCreate,
     IncidentRead,
     IncidentStatus,
+    IncidentUpdate,
 )
 
 router = APIRouter(prefix="/incidents", tags=["incidents"])
