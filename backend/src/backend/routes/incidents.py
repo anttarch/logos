@@ -55,3 +55,30 @@ def create_incident(db: SessionDep, incident_create: IncidentCreate):
     incident = Incident(**incident_create.model_dump())
     db.add(incident)
     db.commit()
+
+
+@router.patch("/{incident_id}")
+def update_incident(db: SessionDep, incident_id: int, incident_update: IncidentUpdate):
+    incident = db.query(exists().where(Incident.id == incident_id)).scalar()
+    if not incident:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Incident not found"
+        )
+
+    new_data = incident_update.model_dump(exclude_unset=True)
+    stmt = (
+        update(Incident)
+        .where(Incident.id == incident_id, Incident.version == incident_update.version)
+        .values(new_data)
+    )
+
+    did_change = db.execute(stmt)
+
+    if did_change == 0:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT, detail="Incident is outdated"
+        )
+
+    db.commit()
+    updated = db.get(Incident, incident_id)
+    return IncidentRead.model_validate(updated).model_dump(mode="json")
