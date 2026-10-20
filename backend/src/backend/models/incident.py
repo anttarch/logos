@@ -1,18 +1,11 @@
-from datetime import UTC, datetime
+from datetime import datetime
 
-from sqlalchemy import (
-    DateTime,
-    Integer,
-    String,
-    Text,
-)
-from sqlalchemy import (
-    Enum as DBEnum,
-)
+from sqlalchemy import DateTime, Integer, String, Text
+from sqlalchemy import Enum as DBEnum
 from sqlalchemy.orm import Mapped, mapped_column
 
 from ..schemas.enums import Criticality, IncidentCategory, IncidentStatus
-from .base import Base
+from .base import Base, utcnow
 
 
 class Incident(Base):
@@ -50,13 +43,13 @@ class Incident(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.now(UTC).replace(tzinfo=None),
+        default=utcnow(),
         nullable=False,
         index=True,
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.now(UTC).replace(tzinfo=None),
-        onupdate=datetime.now(UTC).replace(tzinfo=None),
+        default=utcnow(),
+        onupdate=utcnow(),
         nullable=False,
     )

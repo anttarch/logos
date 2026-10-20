@@ -1,0 +1,30 @@
+from datetime import datetime
+
+from sqlalchemy import DateTime, String
+from sqlalchemy.orm import Mapped, mapped_column
+
+from .base import Base, utcnow
+
+
+class Truck(Base):
+    __tablename__ = "trucks"
+
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True,
+    )
+    plate: Mapped[str] = mapped_column(String(7), unique=True, index=True)
+    driver_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    location: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=utcnow(),
+        nullable=False,
+        index=True,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=utcnow(),
+        onupdate=utcnow(),
+        nullable=False,
+    )
