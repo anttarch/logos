@@ -57,13 +57,13 @@ class Incident(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=utcnow(),
+        default=utcnow,
         nullable=False,
         index=True,
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=utcnow(),
-        onupdate=utcnow(),
+        default=utcnow,
+        onupdate=utcnow,
         nullable=False,
     )
