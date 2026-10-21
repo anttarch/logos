@@ -97,27 +97,51 @@ async def update_incident(
             status_code=HTTPStatus.NOT_FOUND, detail="Incident not found"
         )
 
-    # primeira verificação: rejeita versões diferentes de início
+    # primeira verificação: rejeita versões diferentes ou lock de outro usuário
     if incident.version != incident_update.version:
         raise HTTPException(
-            status_code=HTTPStatus.CONFLICT, detail="Incident is outdated"
+            status_code=HTTPStatus.CONFLICT,
+            detail="Incident version is outdated.",
         )
 
-    new_data = incident_update.model_dump(exclude_unset=True, exclude_none=True)
+    if (
+        incident.status == IncidentStatus.UNDER_INVESTIGATION
+        and incident.assigned_to not in (None, incident_update.assigned_to)
+    ):
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail="Incident is already assigned.",
+        )
+
+    raw_update = incident_update.model_dump(exclude_unset=True)
+    explict_reassign = "assigned_to" in raw_update
+    new_data = {k: v for k, v in raw_update.items() if v is not None}
+
     if not new_data:
-        # retorna o incident encontrado, sem alterações
         return IncidentResponse.model_validate(incident).model_dump(mode="json")
 
     new_data["version"] = incident_update.version + 1
+    if new_data.get("status") == IncidentStatus.UNDER_INVESTIGATION:
+        if explict_reassign:
+            new_data["assigned_to"] = incident_update.assigned_to
+        # se não explicit, mantém o valor atual no banco
+    elif "status" in new_data:
+        new_data["assigned_to"] = None
+
     stmt = (
         update(Incident)
-        # segunda verificação: caso o valor desde a primeira
+        # segunda verificação: caso o valor mude desde a primeira
         .where(Incident.id == incident_id, Incident.version == incident_update.version)
         .values(new_data)
         .returning(Incident)
     )
 
     changed = await db.scalar(stmt)
+    if not changed:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail="Incident was modified by another user.",
+        )
     await db.commit()
     json = IncidentResponse.model_validate(changed).model_dump(mode="json")
     await ws.broadcast({"event": "PATCH_INCIDENT", "payload": json})

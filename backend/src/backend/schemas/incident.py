@@ -25,6 +25,7 @@ class IncidentResponse(IncidentBase):
     id: int
     status: IncidentStatus
     version: int
+    assigned_to: str | None = None
     truck: TruckResponse
     created_at: datetime
     updated_at: datetime
@@ -40,3 +41,4 @@ class IncidentCreate(IncidentBase):
 class IncidentUpdate(BaseModel):
     version: int = Field(ge=1)
     status: IncidentStatus | None = None
+    assigned_to: str | None = None
