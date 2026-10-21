@@ -21,4 +21,5 @@ export interface IncidentCreate {
   location: string;
   notes?: string | null;
   status?: IncidentStatus;
+  truck_id: number;
 }

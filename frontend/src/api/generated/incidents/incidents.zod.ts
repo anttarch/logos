@@ -74,7 +74,8 @@ export const CreateIncidentIncidentsPostBody = zod.object({
   "description": zod.union([zod.string(),zod.null()]).optional(),
   "location": zod.string().max(createIncidentIncidentsPostBodyLocationMax),
   "notes": zod.union([zod.string(),zod.null()]).optional(),
-  "status": zod.enum(['OPEN', 'CLOSED', 'UNDER_INVESTIGATION', 'INCONCLUSIVE']).default(createIncidentIncidentsPostBodyStatusDefault)
+  "status": zod.enum(['OPEN', 'CLOSED', 'UNDER_INVESTIGATION', 'INCONCLUSIVE']).default(createIncidentIncidentsPostBodyStatusDefault),
+  "truck_id": zod.int()
 })
 
 export const createIncidentIncidentsPostResponseTitleMin = 3;
@@ -129,8 +130,7 @@ export const UpdateIncidentIncidentsIncidentIdPatchParams = zod.object({
 
 export const UpdateIncidentIncidentsIncidentIdPatchBody = zod.object({
   "version": zod.int().min(1),
-  "status": zod.union([zod.enum(['OPEN', 'CLOSED', 'UNDER_INVESTIGATION', 'INCONCLUSIVE']),zod.null()]).optional(),
-  "criticality": zod.union([zod.enum(['HIGH', 'MEDIUM', 'LOW']),zod.null()]).optional()
+  "status": zod.union([zod.enum(['OPEN', 'CLOSED', 'UNDER_INVESTIGATION', 'INCONCLUSIVE']),zod.null()]).optional()
 })
 
 export const updateIncidentIncidentsIncidentIdPatchResponseTitleMin = 3;

@@ -4,12 +4,10 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { IncidentCriticality } from './incidentCriticality';
 import type { IncidentStatus } from './incidentStatus';
 
 export interface IncidentUpdate {
   /** @minimum 1 */
   version: number;
   status?: IncidentStatus | null;
-  criticality?: IncidentCriticality | null;
 }
