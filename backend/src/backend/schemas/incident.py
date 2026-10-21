@@ -13,6 +13,7 @@ class IncidentBase(BaseModel):
     title: str = Field(min_length=3, max_length=255)
     description: str | None = None
     location: str = Field(max_length=255)
+    notes: str | None = None
 
 
 # pra GET

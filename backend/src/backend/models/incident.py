@@ -39,6 +39,7 @@ class Incident(Base):
         nullable=False,
     )
     title: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     location: Mapped[str] = mapped_column(String(255), nullable=True)
 
