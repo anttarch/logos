@@ -15,8 +15,8 @@ class Truck(Base):
         autoincrement=True,
     )
     plate: Mapped[str] = mapped_column(String(7), unique=True, index=True)
-    driver_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    location: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    driver_name: Mapped[str] = mapped_column(String(120), nullable=True)
+    location: Mapped[str] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=utcnow,

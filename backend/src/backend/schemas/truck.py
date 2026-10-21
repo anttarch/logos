@@ -6,8 +6,8 @@ from pydantic import BaseModel, Field
 # classe base
 class TruckBase(BaseModel):
     plate: str = Field(min_length=7, max_length=7)
-    driver_name: str | None = Field(None, min_length=1, max_length=120)
-    location: str | None = Field(None, max_length=255)
+    driver_name: str = Field(min_length=3, max_length=120)
+    location: str = Field(max_length=255)
 
 
 # pra GET
@@ -26,5 +26,5 @@ class TruckCreate(TruckBase):
 
 # pra PATCH
 class TruckUpdate(BaseModel):
-    driver_name: str | None = Field(None, min_length=1, max_length=120)
+    driver_name: str | None = Field(None, min_length=3, max_length=120)
     location: str | None = Field(None, max_length=255)
