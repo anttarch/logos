@@ -40,7 +40,18 @@ async def get_incidents(
         (Incident.criticality == IncidentCriticality.LOW, 1),
     ).desc()
 
-    query = query.order_by(criticality_ordering, Incident.created_at.desc())
+    # completamente arbitrario, mas faz sentido pra mim...
+    category_ordering = sql_case(
+        (Incident.category == IncidentCategory.VICTIM_ACCIDENT, 5),
+        (Incident.category == IncidentCategory.VEHICLE_ACCIDENT, 4),
+        (Incident.category == IncidentCategory.WEIRD_WEATHER_CONDITION, 3),
+        (Incident.category == IncidentCategory.MECHANICAL_ISSUE, 2),
+        (Incident.category == IncidentCategory.ROAD_BLOCK, 1),
+    )
+
+    query = query.order_by(
+        criticality_ordering, category_ordering, Incident.created_at.desc()
+    )
 
     incidents = (await db.execute(query)).scalars().all()
 
