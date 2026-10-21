@@ -104,8 +104,12 @@ async def update_incident(
             detail="Incident version is outdated.",
         )
 
+    raw_update = incident_update.model_dump(exclude_unset=True)
+    explict_reassign = "assigned_to" in raw_update
     if (
         incident.status == IncidentStatus.UNDER_INVESTIGATION
+        and incident_update.status == IncidentStatus.UNDER_INVESTIGATION
+        and explict_reassign
         and incident.assigned_to not in (None, incident_update.assigned_to)
     ):
         raise HTTPException(
@@ -113,10 +117,7 @@ async def update_incident(
             detail="Incident is already assigned.",
         )
 
-    raw_update = incident_update.model_dump(exclude_unset=True)
-    explict_reassign = "assigned_to" in raw_update
     new_data = {k: v for k, v in raw_update.items() if v is not None}
-
     if not new_data:
         return IncidentResponse.model_validate(incident).model_dump(mode="json")
 
