@@ -26,11 +26,16 @@ import {
 import { CriticalityBadge } from "../criticality-badge"
 import { StatusBadge } from "../status-badge"
 import { CategoryIcon } from "../category-icon"
+import { IncidentsView } from "./incidents-view"
 
 interface CentralViewProps {
   incidents: IncidentResponse[]
+  selectedIncidentId: number | null
+  onSelectIncident: (incidentId: number | null) => void
   onAssumeTriage: (incidentId: number) => void
-  onSelectAndNavigate: (incidentId: number) => void
+  onLockAndAssume: (id: number) => void
+  onReleaseLock: (id: number) => void
+  onAddNote: (id: number, note: string, notifySupervisor: boolean) => void
 }
 
 const criticality_items = [
@@ -62,8 +67,12 @@ const status_items = [
 
 export function CentralView({
   incidents,
+  selectedIncidentId,
+  onSelectIncident,
   onAssumeTriage,
-  onSelectAndNavigate,
+  onLockAndAssume,
+  onReleaseLock,
+  onAddNote,
 }: CentralViewProps) {
   const [search, setSearch] = useState("")
   const [critFilter, setCritFilter] = useState<IncidentCriticality | null>(null)
@@ -98,6 +107,19 @@ export function CentralView({
       return matchSearch && matchCrit && matchCat && matchStatus
     })
   }, [incidents, search, critFilter, catFilter, statusFilter])
+
+  if (selectedIncidentId !== null) {
+    return (
+      <IncidentsView
+        incidents={incidents}
+        selectedIncidentId={selectedIncidentId}
+        onBack={() => onSelectIncident(null)}
+        onLockAndAssume={onLockAndAssume}
+        onReleaseLock={onReleaseLock}
+        onAddNote={onAddNote}
+      />
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -163,7 +185,7 @@ export function CentralView({
                   <div className="flex justify-end gap-3 border-t pt-3 md:flex-col md:justify-end md:gap-1 md:border-t-0 md:pt-0">
                     <Button
                       size="sm"
-                      onClick={() => onSelectAndNavigate(inc.id)}
+                      onClick={() => onSelectIncident(inc.id)}
                       className="gap-1.5 md:w-full"
                     >
                       <InfoIcon className="size-3.5" />
@@ -261,7 +283,7 @@ export function CentralView({
           <Card
             key={inc.id}
             size="sm"
-            onClick={() => onSelectAndNavigate(inc.id)}
+            onClick={() => onSelectIncident(inc.id)}
             className="cursor-pointer transition-colors hover:bg-border/30"
           >
             <CardHeader>

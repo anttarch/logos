@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/tooltip"
 import type { UserSession } from "@/types/session"
 
-export type ActiveNavView = "triagem" | "ativos" | "fila-critica" | "testes"
+export type ActiveNavView = "triagem" | "fila-critica" | "testes"
 
 interface NavbarProps {
   activeView?: ActiveNavView
@@ -54,14 +54,6 @@ export function Navbar({
                 className="gap-1.5 text-xs"
               >
                 <span>Triagem</span>
-              </Button>
-              <Button
-                variant={activeView === "ativos" ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => onViewChange("ativos")}
-                className="text-xs"
-              >
-                Incidentes Ativos
               </Button>
               <Button
                 variant={activeView === "fila-critica" ? "secondary" : "ghost"}
@@ -139,13 +131,6 @@ export function Navbar({
             onClick={() => onViewChange("triagem")}
           >
             Triagem
-          </Button>
-          <Button
-            variant={activeView === "ativos" ? "secondary" : "ghost"}
-            size="xs"
-            onClick={() => onViewChange("ativos")}
-          >
-            Incidentes Ativos
           </Button>
           <Button
             variant={activeView === "fila-critica" ? "secondary" : "ghost"}
