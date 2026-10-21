@@ -28,8 +28,8 @@ export const GetTrucksTrucksGetResponseItem = zod.object({
   "location": zod.string().max(getTrucksTrucksGetResponseLocationMax),
   "model": zod.string().max(getTrucksTrucksGetResponseModelMax),
   "id": zod.int(),
-  "created_at": zod.iso.datetime({"offset":true}),
-  "updated_at": zod.iso.datetime({"offset":true})
+  "created_at": zod.iso.datetime({"local":true}),
+  "updated_at": zod.iso.datetime({"local":true})
 })
 export const GetTrucksTrucksGetResponse = zod.array(GetTrucksTrucksGetResponseItem)
 
@@ -73,8 +73,8 @@ export const CreateTruckTrucksPostResponse = zod.object({
   "location": zod.string().max(createTruckTrucksPostResponseLocationMax),
   "model": zod.string().max(createTruckTrucksPostResponseModelMax),
   "id": zod.int(),
-  "created_at": zod.iso.datetime({"offset":true}),
-  "updated_at": zod.iso.datetime({"offset":true})
+  "created_at": zod.iso.datetime({"local":true}),
+  "updated_at": zod.iso.datetime({"local":true})
 })
 
 /**
@@ -114,7 +114,7 @@ export const UpdateTruckTrucksTruckIdPatchResponse = zod.object({
   "location": zod.string().max(updateTruckTrucksTruckIdPatchResponseLocationMax),
   "model": zod.string().max(updateTruckTrucksTruckIdPatchResponseModelMax),
   "id": zod.int(),
-  "created_at": zod.iso.datetime({"offset":true}),
-  "updated_at": zod.iso.datetime({"offset":true})
+  "created_at": zod.iso.datetime({"local":true}),
+  "updated_at": zod.iso.datetime({"local":true})
 })
 

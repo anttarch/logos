@@ -49,11 +49,11 @@ export const GetIncidentsIncidentsGetResponseItem = zod.object({
   "location": zod.string().max(getIncidentsIncidentsGetResponseTruckLocationMax),
   "model": zod.string().max(getIncidentsIncidentsGetResponseTruckModelMax),
   "id": zod.int(),
-  "created_at": zod.iso.datetime({"offset":true}),
-  "updated_at": zod.iso.datetime({"offset":true})
+  "created_at": zod.iso.datetime({"local":true}),
+  "updated_at": zod.iso.datetime({"local":true})
 }),
-  "created_at": zod.iso.datetime({"offset":true}),
-  "updated_at": zod.iso.datetime({"offset":true})
+  "created_at": zod.iso.datetime({"local":true}),
+  "updated_at": zod.iso.datetime({"local":true})
 })
 export const GetIncidentsIncidentsGetResponse = zod.array(GetIncidentsIncidentsGetResponseItem)
 
@@ -111,11 +111,11 @@ export const CreateIncidentIncidentsPostResponse = zod.object({
   "location": zod.string().max(createIncidentIncidentsPostResponseTruckLocationMax),
   "model": zod.string().max(createIncidentIncidentsPostResponseTruckModelMax),
   "id": zod.int(),
-  "created_at": zod.iso.datetime({"offset":true}),
-  "updated_at": zod.iso.datetime({"offset":true})
+  "created_at": zod.iso.datetime({"local":true}),
+  "updated_at": zod.iso.datetime({"local":true})
 }),
-  "created_at": zod.iso.datetime({"offset":true}),
-  "updated_at": zod.iso.datetime({"offset":true})
+  "created_at": zod.iso.datetime({"local":true}),
+  "updated_at": zod.iso.datetime({"local":true})
 })
 
 /**
@@ -166,10 +166,10 @@ export const UpdateIncidentIncidentsIncidentIdPatchResponse = zod.object({
   "location": zod.string().max(updateIncidentIncidentsIncidentIdPatchResponseTruckLocationMax),
   "model": zod.string().max(updateIncidentIncidentsIncidentIdPatchResponseTruckModelMax),
   "id": zod.int(),
-  "created_at": zod.iso.datetime({"offset":true}),
-  "updated_at": zod.iso.datetime({"offset":true})
+  "created_at": zod.iso.datetime({"local":true}),
+  "updated_at": zod.iso.datetime({"local":true})
 }),
-  "created_at": zod.iso.datetime({"offset":true}),
-  "updated_at": zod.iso.datetime({"offset":true})
+  "created_at": zod.iso.datetime({"local":true}),
+  "updated_at": zod.iso.datetime({"local":true})
 })
 
