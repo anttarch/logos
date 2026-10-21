@@ -53,7 +53,7 @@ async def get_incidents(
         criticality_ordering, category_ordering, Incident.created_at.desc()
     )
 
-    incidents = (await db.execute(query)).scalars().all()
+    incidents = (await db.scalars(query)).all()
 
     return [
         IncidentResponse.model_validate(i).model_dump(mode="json") for i in incidents
@@ -67,11 +67,9 @@ async def get_incidents(
     responses={HTTPStatus.NOT_FOUND: {}},
 )
 async def create_incident(db: SessionDep, incident_create: IncidentCreate):
-    truck_exists = (
-        await db.execute(
-            select(select(Truck).where(Truck.id == incident_create.truck_id).exists())
-        )
-    ).scalar()
+    truck_exists = await db.scalar(
+        select(Truck).where(Truck.id == incident_create.truck_id)
+    )
     if not truck_exists:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Truck not found")
 
@@ -116,6 +114,6 @@ async def update_incident(
         .returning(Incident)
     )
 
-    changed = (await db.execute(stmt)).scalar()
+    changed = await db.scalar(stmt)
     await db.commit()
     return IncidentResponse.model_validate(changed).model_dump(mode="json")

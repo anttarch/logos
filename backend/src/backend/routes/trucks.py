@@ -12,7 +12,7 @@ router = APIRouter(prefix="/trucks", tags=["trucks"])
 
 @router.get("/", response_model=list[TruckResponse])
 async def get_trucks(db: SessionDep):
-    trucks = (await db.execute(select(Truck))).scalars().all()
+    trucks = (await db.scalars(select(Truck))).all()
     return [TruckResponse.model_validate(t).model_dump(mode="json") for t in trucks]
 
 
@@ -23,11 +23,9 @@ async def get_trucks(db: SessionDep):
     responses={HTTPStatus.CONFLICT: {}},
 )
 async def create_truck(db: SessionDep, truck_create: TruckCreate):
-    plate_exists = (
-        await db.execute(
-            select(select(Truck).where(Truck.plate == truck_create.plate).exists())
-        )
-    ).scalar()
+    plate_exists = await db.scalar(
+        select(Truck).where(Truck.plate == truck_create.plate)
+    )
     if plate_exists:
         raise HTTPException(
             status_code=HTTPStatus.CONFLICT, detail="Plate already exists"
@@ -56,7 +54,7 @@ async def update_truck(db: SessionDep, truck_id: int, truck_update: TruckUpdate)
         return TruckResponse.model_validate(truck).model_dump(mode="json")
 
     stmt = update(Truck).where(Truck.id == truck_id).values(new_data).returning(Truck)
-    changed = (await db.execute(stmt)).scalar_one()
+    changed = await db.scalar(stmt)
     await db.commit()
 
     return TruckResponse.model_validate(changed).model_dump(mode="json")
