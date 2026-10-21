@@ -21,7 +21,6 @@ export const trucksAPI = {
     const trucks: TruckResponse[] = []
     for (const i of data) {
       const p = GetTrucksTrucksGetResponseItem.safeParse(i)
-      console.log(`${p.error} as`)
 
       if (p.success) {
         trucks.push(p.data)
@@ -69,6 +68,6 @@ export const trucksAPI = {
       return p.data
     }
 
-    throw new Error(`Failed to parse updateTruck response: ${p.error}`)
+    throw new Error(`Failed to parse updateTruck response`)
   },
 }
