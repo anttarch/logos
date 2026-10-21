@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, HTTPException
-from sqlalchemy import exists, select, update
+from sqlalchemy import select, update
 
 from ..database import SessionDep
 from ..models import Truck
@@ -11,8 +11,8 @@ router = APIRouter(prefix="/trucks", tags=["trucks"])
 
 
 @router.get("/", response_model=list[TruckResponse])
-def get_trucks(db: SessionDep):
-    trucks = db.execute(select(Truck)).scalars().all()
+async def get_trucks(db: SessionDep):
+    trucks = (await db.execute(select(Truck))).scalars().all()
     return [TruckResponse.model_validate(t).model_dump(mode="json") for t in trucks]
 
 
@@ -22,8 +22,8 @@ def get_trucks(db: SessionDep):
     response_model=TruckResponse,
     responses={HTTPStatus.CONFLICT: {}},
 )
-def create_truck(db: SessionDep, truck_create: TruckCreate):
-    plate = db.query(exists().where(Truck.plate == truck_create.plate)).scalar()
+async def create_truck(db: SessionDep, truck_create: TruckCreate):
+    plate = select(Truck).where(Truck.plate == truck_create.plate).exists().bool_op
     if plate:
         raise HTTPException(
             status_code=HTTPStatus.CONFLICT, detail="Plate already exists"
@@ -31,8 +31,8 @@ def create_truck(db: SessionDep, truck_create: TruckCreate):
 
     truck = Truck(**truck_create.model_dump())
     db.add(truck)
-    db.commit()
-    db.refresh(truck)
+    await db.commit()
+    await db.refresh(truck)
     return TruckResponse.model_validate(truck).model_dump(mode="json")
 
 
@@ -41,8 +41,8 @@ def create_truck(db: SessionDep, truck_create: TruckCreate):
     response_model=TruckResponse,
     responses={HTTPStatus.NOT_FOUND: {}},
 )
-def update_truck(db: SessionDep, truck_id: int, truck_update: TruckUpdate):
-    truck = db.get(Truck, truck_id)
+async def update_truck(db: SessionDep, truck_id: int, truck_update: TruckUpdate):
+    truck = await db.get(Truck, truck_id)
     if not truck:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Truck not found")
 
@@ -52,7 +52,7 @@ def update_truck(db: SessionDep, truck_id: int, truck_update: TruckUpdate):
         return TruckResponse.model_validate(truck).model_dump(mode="json")
 
     stmt = update(Truck).where(Truck.id == truck_id).values(new_data).returning(Truck)
-    changed = db.execute(stmt).scalar_one()
-    db.commit()
+    changed = (await db.execute(stmt)).scalar_one()
+    await db.commit()
 
     return TruckResponse.model_validate(changed).model_dump(mode="json")

@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import case as sql_case
-from sqlalchemy import exists, select, update
+from sqlalchemy import select, update
 
 from ..database import SessionDep
 from ..models import Incident, Truck
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/incidents", tags=["incidents"])
 
 
 @router.get("/", response_model=list[IncidentResponse])
-def get_incidents(
+async def get_incidents(
     db: SessionDep,
     category: IncidentCategory | None = None,
     status: IncidentStatus | None = None,
@@ -42,7 +42,7 @@ def get_incidents(
 
     query = query.order_by(criticality_ordering, Incident.created_at.desc())
 
-    incidents = db.execute(query).scalars().all()
+    incidents = (await db.execute(query)).scalars().all()
 
     return [
         IncidentResponse.model_validate(i).model_dump(mode="json") for i in incidents
@@ -55,15 +55,15 @@ def get_incidents(
     response_model=IncidentResponse,
     responses={HTTPStatus.NOT_FOUND: {}},
 )
-def create_incident(db: SessionDep, incident_create: IncidentCreate):
-    truck = db.query(exists().where(Truck.id == incident_create.truck_id)).scalar()
+async def create_incident(db: SessionDep, incident_create: IncidentCreate):
+    truck = select(Truck).where(Truck.id == incident_create.truck_id).exists().bool_op
     if not truck:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Truck not found")
 
     incident = Incident(**incident_create.model_dump())
     db.add(incident)
-    db.commit()
-    db.refresh(incident)
+    await db.commit()
+    await db.refresh(incident)
     return IncidentResponse.model_validate(incident).model_dump(mode="json")
 
 
@@ -72,8 +72,10 @@ def create_incident(db: SessionDep, incident_create: IncidentCreate):
     response_model=IncidentResponse,
     responses={HTTPStatus.NOT_FOUND: {}, HTTPStatus.CONFLICT: {}},
 )
-def update_incident(db: SessionDep, incident_id: int, incident_update: IncidentUpdate):
-    incident = db.get(Incident, incident_id)
+async def update_incident(
+    db: SessionDep, incident_id: int, incident_update: IncidentUpdate
+):
+    incident = await db.get(Incident, incident_id)
     if not incident:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="Incident not found"
@@ -99,6 +101,6 @@ def update_incident(db: SessionDep, incident_id: int, incident_update: IncidentU
         .returning(Incident)
     )
 
-    changed = db.execute(stmt).scalar()
-    db.commit()
+    changed = (await db.execute(stmt)).scalar()
+    await db.commit()
     return IncidentResponse.model_validate(changed).model_dump(mode="json")

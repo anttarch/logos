@@ -54,6 +54,7 @@ class Incident(Base):
     truck: Mapped[Truck] = relationship(
         "Truck",
         back_populates="incidents",
+        lazy="selectin",
     )
 
     created_at: Mapped[datetime] = mapped_column(
