@@ -36,7 +36,6 @@ interface CentralViewProps {
   onAssumeTriage: (incidentId: number) => void
   onLockAndAssume: (id: number) => void
   onReleaseLock: (id: number) => void
-  onAddNote: (id: number, note: string, notifySupervisor: boolean) => void
 }
 
 const criticality_items = [
@@ -73,7 +72,6 @@ export function CentralView({
   onAssumeTriage,
   onLockAndAssume,
   onReleaseLock,
-  onAddNote,
 }: CentralViewProps) {
   const {
     search,
@@ -107,7 +105,6 @@ export function CentralView({
         onBack={() => onSelectIncident(null)}
         onLockAndAssume={onLockAndAssume}
         onReleaseLock={onReleaseLock}
-        onAddNote={onAddNote}
       />
     )
   }

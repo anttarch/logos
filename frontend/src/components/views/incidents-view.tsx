@@ -20,7 +20,6 @@ interface IncidentsViewProps {
   onBack?: () => void
   onLockAndAssume: (id: number) => void
   onReleaseLock: (id: number) => void
-  onAddNote: (id: number, note: string, notifySupervisor: boolean) => void
 }
 
 export function IncidentsView({
