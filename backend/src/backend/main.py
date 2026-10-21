@@ -1,9 +1,11 @@
 import logging
 from contextlib import asynccontextmanager
+from functools import lru_cache
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from .config import get_settings
 from .database import init_db
 from .routes.incidents import router as incident_router
 from .routes.trucks import router as truck_router
@@ -19,7 +21,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(title=get_settings().app_name, lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

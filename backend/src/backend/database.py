@@ -1,16 +1,16 @@
-import os
 from typing import Annotated
 
 from fastapi import Depends
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+from .config import get_settings
 from .models.base import Base
 
 
 # todo: pegar da .env
 def db_url() -> str:
-    return os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./logos.db")
+    return get_settings().database_url
 
 
 async def init_db() -> None:
