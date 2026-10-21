@@ -56,14 +56,6 @@ export function Navbar({
                 <span>Triagem</span>
               </Button>
               <Button
-                variant={activeView === "fila-critica" ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => onViewChange("fila-critica")}
-                className="text-xs"
-              >
-                Fila Crítica (Exceção)
-              </Button>
-              <Button
                 variant={activeView === "testes" ? "secondary" : "ghost"}
                 size="sm"
                 onClick={() => onViewChange("testes")}
@@ -121,26 +113,6 @@ export function Navbar({
           </Tooltip>
         </div>
       </div>
-
-      {/* mobile */}
-      {!minimal && onViewChange && (
-        <div className="flex items-center gap-1 overflow-x-auto border-t px-4 py-1.5 md:hidden">
-          <Button
-            variant={activeView === "triagem" ? "secondary" : "ghost"}
-            size="xs"
-            onClick={() => onViewChange("triagem")}
-          >
-            Triagem
-          </Button>
-          <Button
-            variant={activeView === "fila-critica" ? "secondary" : "ghost"}
-            size="xs"
-            onClick={() => onViewChange("fila-critica")}
-          >
-            Fila Crítica
-          </Button>
-        </div>
-      )}
     </header>
   )
 }
