@@ -1,15 +1,5 @@
 import { useState, useMemo } from "react"
-import {
-  CarIcon,
-  CloudAlertIcon,
-  FlameIcon,
-  HeartPulseIcon,
-  InfoIcon,
-  SearchIcon,
-  TrafficConeIcon,
-  WrenchIcon,
-  ZapIcon,
-} from "lucide-react"
+import { InfoIcon, SearchIcon, ZapIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -35,28 +25,12 @@ import {
 } from "@/api/model"
 import { CriticalityBadge } from "../criticality-badge"
 import { StatusBadge } from "../status-badge"
+import { CategoryIcon } from "../category-icon"
 
 interface CentralViewProps {
   incidents: IncidentResponse[]
   onAssumeTriage: (incidentId: number) => void
   onSelectAndNavigate: (incidentId: number) => void
-}
-
-function getCategoryIcon(category: IncidentCategory) {
-  switch (category) {
-    case IncidentCategory.VEHICLE_ACCIDENT:
-      return <FlameIcon className="size-5 text-amber-500" />
-    case IncidentCategory.VICTIM_ACCIDENT:
-      return <HeartPulseIcon className="size-5 text-destructive" />
-    case IncidentCategory.WEIRD_WEATHER_CONDITION:
-      return <CloudAlertIcon className="size-5 text-destructive" />
-    case IncidentCategory.MECHANICAL_ISSUE:
-      return <WrenchIcon className="size-5 text-destructive" />
-    case IncidentCategory.ROAD_BLOCK:
-      return <TrafficConeIcon className="size-5 text-destructive" />
-    default:
-      return <CarIcon className="size-5 text-destructive" />
-  }
 }
 
 const criticality_items = [
@@ -156,13 +130,9 @@ export function CentralView({
               >
                 <CardContent className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                   <div className="flex gap-3.5">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-destructive/30 bg-destructive/10">
-                      {getCategoryIcon(inc.category)}
-                    </div>
+                    <CategoryIcon category={inc.category} />
                     <div className="space-y-1.5">
-                      <Badge className="rounded-sm bg-destructive text-[10px] font-extrabold text-white uppercase">
-                        ALTA
-                      </Badge>
+                      <CriticalityBadge criticality={inc.criticality} />
                       <h3 className="flex flex-wrap gap-2 text-[16px] font-extrabold text-foreground">
                         {inc.title}
                         <Badge

@@ -30,5 +30,9 @@ export function CategoryIcon({ category }: CategoryIconProps) {
     }
   }
 
-  return getCategoryIcon(category)
+  return (
+    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-destructive/30 bg-destructive/10">
+      {getCategoryIcon(category)}
+    </div>
+  )
 }
