@@ -1,4 +1,4 @@
-import * as React from "react"
+import { type SubmitEvent, useState } from "react"
 import { CheckIcon, WrenchIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -16,9 +16,9 @@ interface SessionViewProps {
 }
 
 export function SessionView({ user, onStart: onStart }: SessionViewProps) {
-  const [nameInput, setNameInput] = React.useState(user.name)
+  const [nameInput, setNameInput] = useState(user.name)
 
-  const handleSubmit = (e: React.SubmitEvent) => {
+  const handleSubmit = (e: SubmitEvent) => {
     e.preventDefault()
     const trimmed = nameInput.trim() || "Larissa Rocha"
     onStart({
