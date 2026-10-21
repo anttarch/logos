@@ -14,6 +14,7 @@ from ..schemas import (
     IncidentStatus,
     IncidentUpdate,
 )
+from .websocket import ws
 
 router = APIRouter(prefix="/incidents", tags=["incidents"])
 
@@ -77,7 +78,9 @@ async def create_incident(db: SessionDep, incident_create: IncidentCreate):
     db.add(incident)
     await db.commit()
     await db.refresh(incident)
-    return IncidentResponse.model_validate(incident).model_dump(mode="json")
+    json = IncidentResponse.model_validate(incident).model_dump(mode="json")
+    await ws.broadcast({"type": "NEW_INCIDENT", "payload": json})
+    return json
 
 
 @router.patch(
@@ -116,4 +119,6 @@ async def update_incident(
 
     changed = await db.scalar(stmt)
     await db.commit()
-    return IncidentResponse.model_validate(changed).model_dump(mode="json")
+    json = IncidentResponse.model_validate(changed).model_dump(mode="json")
+    await ws.broadcast({"type": "PATCH_INCIDENT", "payload": json})
+    return json
