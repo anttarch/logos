@@ -40,4 +40,3 @@ class IncidentCreate(IncidentBase):
 class IncidentUpdate(BaseModel):
     version: int = Field(ge=1)
     status: IncidentStatus | None = None
-    criticality: IncidentCriticality | None = None
