@@ -33,6 +33,7 @@ class IncidentResponse(IncidentBase):
 # pra POST
 class IncidentCreate(IncidentBase):
     status: IncidentStatus = IncidentStatus.OPEN
+    truck_id: int
 
 
 # pra PATCH
