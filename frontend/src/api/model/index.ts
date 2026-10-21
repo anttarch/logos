@@ -5,11 +5,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export * from './criticality';
 export * from './getIncidentsIncidentsGetParams';
 export * from './hTTPValidationError';
 export * from './incidentCategory';
 export * from './incidentCreate';
+export * from './incidentCriticality';
 export * from './incidentResponse';
 export * from './incidentStatus';
 export * from './incidentUpdate';

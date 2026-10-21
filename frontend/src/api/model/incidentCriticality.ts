@@ -5,10 +5,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type Criticality = typeof Criticality[keyof typeof Criticality];
+export type IncidentCriticality = typeof IncidentCriticality[keyof typeof IncidentCriticality];
 
 
-export const Criticality = {
+export const IncidentCriticality = {
   HIGH: 'HIGH',
   MEDIUM: 'MEDIUM',
   LOW: 'LOW',

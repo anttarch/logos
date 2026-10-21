@@ -4,12 +4,12 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { Criticality } from './criticality';
 import type { IncidentCategory } from './incidentCategory';
+import type { IncidentCriticality } from './incidentCriticality';
 import type { IncidentStatus } from './incidentStatus';
 
 export type GetIncidentsIncidentsGetParams = {
 category?: IncidentCategory | null;
 status?: IncidentStatus | null;
-criticality?: Criticality | null;
+criticality?: IncidentCriticality | null;
 };

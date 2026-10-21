@@ -16,22 +16,42 @@ export const GetIncidentsIncidentsGetQueryParams = zod.object({
   "criticality": zod.union([zod.enum(['HIGH', 'MEDIUM', 'LOW']),zod.null()]).optional()
 })
 
+export const getIncidentsIncidentsGetResponseTitleMin = 3;
 export const getIncidentsIncidentsGetResponseTitleMax = 255;
 
-export const getIncidentsIncidentsGetResponseLocationOneMax = 255;
+export const getIncidentsIncidentsGetResponseLocationMax = 255;
+
+export const getIncidentsIncidentsGetResponseTruckPlateMin = 7;
+export const getIncidentsIncidentsGetResponseTruckPlateMax = 7;
+
+export const getIncidentsIncidentsGetResponseTruckDriverNameMin = 3;
+export const getIncidentsIncidentsGetResponseTruckDriverNameMax = 120;
+
+export const getIncidentsIncidentsGetResponseTruckLocationMax = 255;
+
+export const getIncidentsIncidentsGetResponseTruckModelMax = 120;
 
 
 
 export const GetIncidentsIncidentsGetResponseItem = zod.object({
   "category": zod.enum(['VEHICLE_ACCIDENT', 'VICTIM_ACCIDENT', 'WEIRD_WEATHER_CONDITION', 'MECHANICAL_ISSUE', 'ROAD_BLOCK']),
   "criticality": zod.enum(['HIGH', 'MEDIUM', 'LOW']),
-  "title": zod.string().min(1).max(getIncidentsIncidentsGetResponseTitleMax),
+  "title": zod.string().min(getIncidentsIncidentsGetResponseTitleMin).max(getIncidentsIncidentsGetResponseTitleMax),
   "description": zod.union([zod.string(),zod.null()]).optional(),
-  "location": zod.union([zod.string().max(getIncidentsIncidentsGetResponseLocationOneMax),zod.null()]).optional(),
-  "truck_id": zod.int(),
+  "location": zod.string().max(getIncidentsIncidentsGetResponseLocationMax),
+  "notes": zod.union([zod.string(),zod.null()]).optional(),
   "id": zod.int(),
   "status": zod.enum(['OPEN', 'CLOSED', 'UNDER_INVESTIGATION', 'INCONCLUSIVE']),
   "version": zod.int(),
+  "truck": zod.object({
+  "plate": zod.string().min(getIncidentsIncidentsGetResponseTruckPlateMin).max(getIncidentsIncidentsGetResponseTruckPlateMax),
+  "driver_name": zod.string().min(getIncidentsIncidentsGetResponseTruckDriverNameMin).max(getIncidentsIncidentsGetResponseTruckDriverNameMax),
+  "location": zod.string().max(getIncidentsIncidentsGetResponseTruckLocationMax),
+  "model": zod.string().max(getIncidentsIncidentsGetResponseTruckModelMax),
+  "id": zod.int(),
+  "created_at": zod.iso.datetime({"offset":true}),
+  "updated_at": zod.iso.datetime({"offset":true})
+}),
   "created_at": zod.iso.datetime({"offset":true}),
   "updated_at": zod.iso.datetime({"offset":true})
 })
@@ -40,38 +60,59 @@ export const GetIncidentsIncidentsGetResponse = zod.array(GetIncidentsIncidentsG
 /**
  * @summary Create Incident
  */
+export const createIncidentIncidentsPostBodyTitleMin = 3;
 export const createIncidentIncidentsPostBodyTitleMax = 255;
 
-export const createIncidentIncidentsPostBodyLocationOneMax = 255;
+export const createIncidentIncidentsPostBodyLocationMax = 255;
 
 export const createIncidentIncidentsPostBodyStatusDefault = `OPEN`;
 
 export const CreateIncidentIncidentsPostBody = zod.object({
   "category": zod.enum(['VEHICLE_ACCIDENT', 'VICTIM_ACCIDENT', 'WEIRD_WEATHER_CONDITION', 'MECHANICAL_ISSUE', 'ROAD_BLOCK']),
   "criticality": zod.enum(['HIGH', 'MEDIUM', 'LOW']),
-  "title": zod.string().min(1).max(createIncidentIncidentsPostBodyTitleMax),
+  "title": zod.string().min(createIncidentIncidentsPostBodyTitleMin).max(createIncidentIncidentsPostBodyTitleMax),
   "description": zod.union([zod.string(),zod.null()]).optional(),
-  "location": zod.union([zod.string().max(createIncidentIncidentsPostBodyLocationOneMax),zod.null()]).optional(),
-  "truck_id": zod.int(),
+  "location": zod.string().max(createIncidentIncidentsPostBodyLocationMax),
+  "notes": zod.union([zod.string(),zod.null()]).optional(),
   "status": zod.enum(['OPEN', 'CLOSED', 'UNDER_INVESTIGATION', 'INCONCLUSIVE']).default(createIncidentIncidentsPostBodyStatusDefault)
 })
 
+export const createIncidentIncidentsPostResponseTitleMin = 3;
 export const createIncidentIncidentsPostResponseTitleMax = 255;
 
-export const createIncidentIncidentsPostResponseLocationOneMax = 255;
+export const createIncidentIncidentsPostResponseLocationMax = 255;
+
+export const createIncidentIncidentsPostResponseTruckPlateMin = 7;
+export const createIncidentIncidentsPostResponseTruckPlateMax = 7;
+
+export const createIncidentIncidentsPostResponseTruckDriverNameMin = 3;
+export const createIncidentIncidentsPostResponseTruckDriverNameMax = 120;
+
+export const createIncidentIncidentsPostResponseTruckLocationMax = 255;
+
+export const createIncidentIncidentsPostResponseTruckModelMax = 120;
 
 
 
 export const CreateIncidentIncidentsPostResponse = zod.object({
   "category": zod.enum(['VEHICLE_ACCIDENT', 'VICTIM_ACCIDENT', 'WEIRD_WEATHER_CONDITION', 'MECHANICAL_ISSUE', 'ROAD_BLOCK']),
   "criticality": zod.enum(['HIGH', 'MEDIUM', 'LOW']),
-  "title": zod.string().min(1).max(createIncidentIncidentsPostResponseTitleMax),
+  "title": zod.string().min(createIncidentIncidentsPostResponseTitleMin).max(createIncidentIncidentsPostResponseTitleMax),
   "description": zod.union([zod.string(),zod.null()]).optional(),
-  "location": zod.union([zod.string().max(createIncidentIncidentsPostResponseLocationOneMax),zod.null()]).optional(),
-  "truck_id": zod.int(),
+  "location": zod.string().max(createIncidentIncidentsPostResponseLocationMax),
+  "notes": zod.union([zod.string(),zod.null()]).optional(),
   "id": zod.int(),
   "status": zod.enum(['OPEN', 'CLOSED', 'UNDER_INVESTIGATION', 'INCONCLUSIVE']),
   "version": zod.int(),
+  "truck": zod.object({
+  "plate": zod.string().min(createIncidentIncidentsPostResponseTruckPlateMin).max(createIncidentIncidentsPostResponseTruckPlateMax),
+  "driver_name": zod.string().min(createIncidentIncidentsPostResponseTruckDriverNameMin).max(createIncidentIncidentsPostResponseTruckDriverNameMax),
+  "location": zod.string().max(createIncidentIncidentsPostResponseTruckLocationMax),
+  "model": zod.string().max(createIncidentIncidentsPostResponseTruckModelMax),
+  "id": zod.int(),
+  "created_at": zod.iso.datetime({"offset":true}),
+  "updated_at": zod.iso.datetime({"offset":true})
+}),
   "created_at": zod.iso.datetime({"offset":true}),
   "updated_at": zod.iso.datetime({"offset":true})
 })
@@ -92,22 +133,42 @@ export const UpdateIncidentIncidentsIncidentIdPatchBody = zod.object({
   "criticality": zod.union([zod.enum(['HIGH', 'MEDIUM', 'LOW']),zod.null()]).optional()
 })
 
+export const updateIncidentIncidentsIncidentIdPatchResponseTitleMin = 3;
 export const updateIncidentIncidentsIncidentIdPatchResponseTitleMax = 255;
 
-export const updateIncidentIncidentsIncidentIdPatchResponseLocationOneMax = 255;
+export const updateIncidentIncidentsIncidentIdPatchResponseLocationMax = 255;
+
+export const updateIncidentIncidentsIncidentIdPatchResponseTruckPlateMin = 7;
+export const updateIncidentIncidentsIncidentIdPatchResponseTruckPlateMax = 7;
+
+export const updateIncidentIncidentsIncidentIdPatchResponseTruckDriverNameMin = 3;
+export const updateIncidentIncidentsIncidentIdPatchResponseTruckDriverNameMax = 120;
+
+export const updateIncidentIncidentsIncidentIdPatchResponseTruckLocationMax = 255;
+
+export const updateIncidentIncidentsIncidentIdPatchResponseTruckModelMax = 120;
 
 
 
 export const UpdateIncidentIncidentsIncidentIdPatchResponse = zod.object({
   "category": zod.enum(['VEHICLE_ACCIDENT', 'VICTIM_ACCIDENT', 'WEIRD_WEATHER_CONDITION', 'MECHANICAL_ISSUE', 'ROAD_BLOCK']),
   "criticality": zod.enum(['HIGH', 'MEDIUM', 'LOW']),
-  "title": zod.string().min(1).max(updateIncidentIncidentsIncidentIdPatchResponseTitleMax),
+  "title": zod.string().min(updateIncidentIncidentsIncidentIdPatchResponseTitleMin).max(updateIncidentIncidentsIncidentIdPatchResponseTitleMax),
   "description": zod.union([zod.string(),zod.null()]).optional(),
-  "location": zod.union([zod.string().max(updateIncidentIncidentsIncidentIdPatchResponseLocationOneMax),zod.null()]).optional(),
-  "truck_id": zod.int(),
+  "location": zod.string().max(updateIncidentIncidentsIncidentIdPatchResponseLocationMax),
+  "notes": zod.union([zod.string(),zod.null()]).optional(),
   "id": zod.int(),
   "status": zod.enum(['OPEN', 'CLOSED', 'UNDER_INVESTIGATION', 'INCONCLUSIVE']),
   "version": zod.int(),
+  "truck": zod.object({
+  "plate": zod.string().min(updateIncidentIncidentsIncidentIdPatchResponseTruckPlateMin).max(updateIncidentIncidentsIncidentIdPatchResponseTruckPlateMax),
+  "driver_name": zod.string().min(updateIncidentIncidentsIncidentIdPatchResponseTruckDriverNameMin).max(updateIncidentIncidentsIncidentIdPatchResponseTruckDriverNameMax),
+  "location": zod.string().max(updateIncidentIncidentsIncidentIdPatchResponseTruckLocationMax),
+  "model": zod.string().max(updateIncidentIncidentsIncidentIdPatchResponseTruckModelMax),
+  "id": zod.int(),
+  "created_at": zod.iso.datetime({"offset":true}),
+  "updated_at": zod.iso.datetime({"offset":true})
+}),
   "created_at": zod.iso.datetime({"offset":true}),
   "updated_at": zod.iso.datetime({"offset":true})
 })

@@ -4,24 +4,27 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { Criticality } from './criticality';
 import type { IncidentCategory } from './incidentCategory';
+import type { IncidentCriticality } from './incidentCriticality';
 import type { IncidentStatus } from './incidentStatus';
+import type { TruckResponse } from './truckResponse';
 
 export interface IncidentResponse {
   category: IncidentCategory;
-  criticality: Criticality;
+  criticality: IncidentCriticality;
   /**
-     * @minLength 1
+     * @minLength 3
      * @maxLength 255
      */
   title: string;
   description?: string | null;
-  location?: string | null;
-  truck_id: number;
+  /** @maxLength 255 */
+  location: string;
+  notes?: string | null;
   id: number;
   status: IncidentStatus;
   version: number;
+  truck: TruckResponse;
   created_at: string;
   updated_at: string;
 }

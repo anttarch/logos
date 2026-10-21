@@ -13,16 +13,20 @@ import * as zod from 'zod';
 export const getTrucksTrucksGetResponsePlateMin = 7;
 export const getTrucksTrucksGetResponsePlateMax = 7;
 
-export const getTrucksTrucksGetResponseDriverNameOneMax = 120;
+export const getTrucksTrucksGetResponseDriverNameMin = 3;
+export const getTrucksTrucksGetResponseDriverNameMax = 120;
 
-export const getTrucksTrucksGetResponseLocationOneMax = 255;
+export const getTrucksTrucksGetResponseLocationMax = 255;
+
+export const getTrucksTrucksGetResponseModelMax = 120;
 
 
 
 export const GetTrucksTrucksGetResponseItem = zod.object({
   "plate": zod.string().min(getTrucksTrucksGetResponsePlateMin).max(getTrucksTrucksGetResponsePlateMax),
-  "driver_name": zod.union([zod.string().min(1).max(getTrucksTrucksGetResponseDriverNameOneMax),zod.null()]).optional(),
-  "location": zod.union([zod.string().max(getTrucksTrucksGetResponseLocationOneMax),zod.null()]).optional(),
+  "driver_name": zod.string().min(getTrucksTrucksGetResponseDriverNameMin).max(getTrucksTrucksGetResponseDriverNameMax),
+  "location": zod.string().max(getTrucksTrucksGetResponseLocationMax),
+  "model": zod.string().max(getTrucksTrucksGetResponseModelMax),
   "id": zod.int(),
   "created_at": zod.iso.datetime({"offset":true}),
   "updated_at": zod.iso.datetime({"offset":true})
@@ -35,31 +39,39 @@ export const GetTrucksTrucksGetResponse = zod.array(GetTrucksTrucksGetResponseIt
 export const createTruckTrucksPostBodyPlateMin = 7;
 export const createTruckTrucksPostBodyPlateMax = 7;
 
-export const createTruckTrucksPostBodyDriverNameOneMax = 120;
+export const createTruckTrucksPostBodyDriverNameMin = 3;
+export const createTruckTrucksPostBodyDriverNameMax = 120;
 
-export const createTruckTrucksPostBodyLocationOneMax = 255;
+export const createTruckTrucksPostBodyLocationMax = 255;
+
+export const createTruckTrucksPostBodyModelMax = 120;
 
 
 
 export const CreateTruckTrucksPostBody = zod.object({
   "plate": zod.string().min(createTruckTrucksPostBodyPlateMin).max(createTruckTrucksPostBodyPlateMax),
-  "driver_name": zod.union([zod.string().min(1).max(createTruckTrucksPostBodyDriverNameOneMax),zod.null()]).optional(),
-  "location": zod.union([zod.string().max(createTruckTrucksPostBodyLocationOneMax),zod.null()]).optional()
+  "driver_name": zod.string().min(createTruckTrucksPostBodyDriverNameMin).max(createTruckTrucksPostBodyDriverNameMax),
+  "location": zod.string().max(createTruckTrucksPostBodyLocationMax),
+  "model": zod.string().max(createTruckTrucksPostBodyModelMax)
 })
 
 export const createTruckTrucksPostResponsePlateMin = 7;
 export const createTruckTrucksPostResponsePlateMax = 7;
 
-export const createTruckTrucksPostResponseDriverNameOneMax = 120;
+export const createTruckTrucksPostResponseDriverNameMin = 3;
+export const createTruckTrucksPostResponseDriverNameMax = 120;
 
-export const createTruckTrucksPostResponseLocationOneMax = 255;
+export const createTruckTrucksPostResponseLocationMax = 255;
+
+export const createTruckTrucksPostResponseModelMax = 120;
 
 
 
 export const CreateTruckTrucksPostResponse = zod.object({
   "plate": zod.string().min(createTruckTrucksPostResponsePlateMin).max(createTruckTrucksPostResponsePlateMax),
-  "driver_name": zod.union([zod.string().min(1).max(createTruckTrucksPostResponseDriverNameOneMax),zod.null()]).optional(),
-  "location": zod.union([zod.string().max(createTruckTrucksPostResponseLocationOneMax),zod.null()]).optional(),
+  "driver_name": zod.string().min(createTruckTrucksPostResponseDriverNameMin).max(createTruckTrucksPostResponseDriverNameMax),
+  "location": zod.string().max(createTruckTrucksPostResponseLocationMax),
+  "model": zod.string().max(createTruckTrucksPostResponseModelMax),
   "id": zod.int(),
   "created_at": zod.iso.datetime({"offset":true}),
   "updated_at": zod.iso.datetime({"offset":true})
@@ -72,6 +84,7 @@ export const UpdateTruckTrucksTruckIdPatchParams = zod.object({
   "truck_id": zod.int()
 })
 
+export const updateTruckTrucksTruckIdPatchBodyDriverNameOneMin = 3;
 export const updateTruckTrucksTruckIdPatchBodyDriverNameOneMax = 120;
 
 export const updateTruckTrucksTruckIdPatchBodyLocationOneMax = 255;
@@ -79,23 +92,27 @@ export const updateTruckTrucksTruckIdPatchBodyLocationOneMax = 255;
 
 
 export const UpdateTruckTrucksTruckIdPatchBody = zod.object({
-  "driver_name": zod.union([zod.string().min(1).max(updateTruckTrucksTruckIdPatchBodyDriverNameOneMax),zod.null()]).optional(),
+  "driver_name": zod.union([zod.string().min(updateTruckTrucksTruckIdPatchBodyDriverNameOneMin).max(updateTruckTrucksTruckIdPatchBodyDriverNameOneMax),zod.null()]).optional(),
   "location": zod.union([zod.string().max(updateTruckTrucksTruckIdPatchBodyLocationOneMax),zod.null()]).optional()
 })
 
 export const updateTruckTrucksTruckIdPatchResponsePlateMin = 7;
 export const updateTruckTrucksTruckIdPatchResponsePlateMax = 7;
 
-export const updateTruckTrucksTruckIdPatchResponseDriverNameOneMax = 120;
+export const updateTruckTrucksTruckIdPatchResponseDriverNameMin = 3;
+export const updateTruckTrucksTruckIdPatchResponseDriverNameMax = 120;
 
-export const updateTruckTrucksTruckIdPatchResponseLocationOneMax = 255;
+export const updateTruckTrucksTruckIdPatchResponseLocationMax = 255;
+
+export const updateTruckTrucksTruckIdPatchResponseModelMax = 120;
 
 
 
 export const UpdateTruckTrucksTruckIdPatchResponse = zod.object({
   "plate": zod.string().min(updateTruckTrucksTruckIdPatchResponsePlateMin).max(updateTruckTrucksTruckIdPatchResponsePlateMax),
-  "driver_name": zod.union([zod.string().min(1).max(updateTruckTrucksTruckIdPatchResponseDriverNameOneMax),zod.null()]).optional(),
-  "location": zod.union([zod.string().max(updateTruckTrucksTruckIdPatchResponseLocationOneMax),zod.null()]).optional(),
+  "driver_name": zod.string().min(updateTruckTrucksTruckIdPatchResponseDriverNameMin).max(updateTruckTrucksTruckIdPatchResponseDriverNameMax),
+  "location": zod.string().max(updateTruckTrucksTruckIdPatchResponseLocationMax),
+  "model": zod.string().max(updateTruckTrucksTruckIdPatchResponseModelMax),
   "id": zod.int(),
   "created_at": zod.iso.datetime({"offset":true}),
   "updated_at": zod.iso.datetime({"offset":true})

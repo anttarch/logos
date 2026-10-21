@@ -11,8 +11,15 @@ export interface TruckResponse {
      * @maxLength 7
      */
   plate: string;
-  driver_name?: string | null;
-  location?: string | null;
+  /**
+     * @minLength 3
+     * @maxLength 120
+     */
+  driver_name: string;
+  /** @maxLength 255 */
+  location: string;
+  /** @maxLength 120 */
+  model: string;
   id: number;
   created_at: string;
   updated_at: string;
