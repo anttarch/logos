@@ -3,16 +3,16 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 from .enums import Criticality, IncidentCategory, IncidentStatus
+from .truck import TruckResponse
 
 
 # classe base
 class IncidentBase(BaseModel):
     category: IncidentCategory
     criticality: Criticality
-    title: str = Field(min_length=1, max_length=255)
+    title: str = Field(min_length=3, max_length=255)
     description: str | None = None
-    location: str | None = Field(None, max_length=255)
-    truck_id: int
+    location: str = Field(max_length=255)
 
 
 # pra GET
@@ -24,6 +24,7 @@ class IncidentResponse(IncidentBase):
     id: int
     status: IncidentStatus
     version: int
+    truck: TruckResponse
     created_at: datetime
     updated_at: datetime
 

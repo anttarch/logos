@@ -40,7 +40,7 @@ class Incident(Base):
     )
     title: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    location: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    location: Mapped[str] = mapped_column(String(255), nullable=True)
 
     truck_id: Mapped[int] = mapped_column(
         ForeignKey("trucks.id", ondelete="CASCADE"),
