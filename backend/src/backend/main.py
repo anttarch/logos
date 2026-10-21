@@ -1,6 +1,5 @@
 import logging
 from contextlib import asynccontextmanager
-from functools import lru_cache
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
