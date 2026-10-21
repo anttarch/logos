@@ -9,6 +9,7 @@ dependencies = [
     "aiosqlite>=0.22.1",
     "fastapi[standard]>=0.150.0",
     "sqlalchemy[asyncio]>=2.1.5",
+    "websockets>=17.3",
 ]
 
 [project.scripts]
