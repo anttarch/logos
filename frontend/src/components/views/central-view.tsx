@@ -33,6 +33,8 @@ import {
   IncidentStatus,
   type IncidentResponse,
 } from "@/api/model"
+import { CriticalityBadge } from "../criticality-badge"
+import { StatusBadge } from "../status-badge"
 
 interface CentralViewProps {
   incidents: IncidentResponse[]
@@ -99,10 +101,8 @@ export function CentralView({
       incidents
         .filter(
           (inc) =>
-            inc.criticality == IncidentCriticality.HIGH &&
-            !inc.lockedBy &&
-            inc.status != IncidentStatus.CLOSED &&
-            inc.status != IncidentStatus.INCONCLUSIVE
+            inc.criticality === IncidentCriticality.HIGH &&
+            inc.status === IncidentStatus.OPEN
         )
         .slice(0, 5),
     [incidents]
@@ -113,7 +113,7 @@ export function CentralView({
     return incidents.filter((inc) => {
       const matchSearch =
         !q ||
-        inc.id.toString().includes(q) ||
+        `#${inc.id.toString()}`.includes(q) ||
         inc.title.toLowerCase().includes(q) ||
         inc.truck.plate.toLowerCase().includes(q) ||
         inc.truck.model.toLowerCase().includes(q) ||
@@ -136,7 +136,8 @@ export function CentralView({
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <h2 className="text-base font-semibold tracking-tight text-destructive">
-                      5 incidentes prioritários - Sem triagem
+                      {unattendedCritical.length} incidentes prioritários - Sem
+                      triagem
                     </h2>
                   </div>
                   <p className="mt-0.5 text-xs text-muted-foreground">
@@ -218,7 +219,6 @@ export function CentralView({
         </section>
       )}
 
-      {/* migrar para pagina geral de incidentes */}
       <Card size="sm" className="bg-muted/30">
         <CardContent className="flex flex-wrap justify-between gap-3">
           <div className="relative min-w-65 flex-1">
@@ -286,47 +286,37 @@ export function CentralView({
         </CardContent>
       </Card>
 
-      {(search ||
-        critFilter != null ||
-        catFilter != null ||
-        statusFilter != null) &&
-        filteredQueue.length > 0 && (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {filteredQueue.map((inc) => (
-              <Card
-                key={inc.id}
-                size="sm"
-                onClick={() => onSelectAndNavigate(inc.id)}
-                className="cursor-pointer transition-colors hover:bg-border/30"
-              >
-                <CardHeader>
-                  <div className="flex items-center justify-between gap-2">
-                    <Badge variant="outline" className="rounded-sm text-[10px]">
-                      {inc.status}
-                    </Badge>
-                    <div className="flex gap-2">
-                      <Badge
-                        variant="secondary"
-                        className="rounded-sm text-[10px] font-bold uppercase"
-                      >
-                        #{inc.id}
-                      </Badge>
-                      <Badge className="rounded-sm bg-destructive text-[10px] font-extrabold text-white uppercase">
-                        {inc.criticality}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-2">
-                  <CardTitle>{inc.title}</CardTitle>
-                  <CardDescription className="text-xs">
-                    {inc.truck.plate} • {inc.location}
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+        {filteredQueue.map((inc) => (
+          <Card
+            key={inc.id}
+            size="sm"
+            onClick={() => onSelectAndNavigate(inc.id)}
+            className="cursor-pointer transition-colors hover:bg-border/30"
+          >
+            <CardHeader>
+              <div className="flex items-center justify-between gap-2">
+                <StatusBadge status={inc.status} />
+                <div className="flex gap-2">
+                  <Badge
+                    variant="secondary"
+                    className="rounded-sm text-[10px] font-bold uppercase"
+                  >
+                    #{inc.id}
+                  </Badge>
+                  <CriticalityBadge criticality={inc.criticality} />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-2">
+              <CardTitle>{inc.title}</CardTitle>
+              <CardDescription className="text-xs">
+                {inc.truck.plate} • {inc.location}
+              </CardDescription>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   )
 }
