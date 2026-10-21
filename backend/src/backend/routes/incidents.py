@@ -47,7 +47,7 @@ async def get_incidents(
         (Incident.category == IncidentCategory.WEIRD_WEATHER_CONDITION, 3),
         (Incident.category == IncidentCategory.MECHANICAL_ISSUE, 2),
         (Incident.category == IncidentCategory.ROAD_BLOCK, 1),
-    )
+    ).desc()
 
     query = query.order_by(
         criticality_ordering, category_ordering, Incident.created_at.desc()
