@@ -2,7 +2,7 @@ import type { TruckCreate, TruckResponse, TruckUpdate } from "@/api/model"
 import { fetchRetry } from "./common"
 import {
   CreateTruckTrucksPostResponse,
-  GetTrucksTrucksGetResponse,
+  GetTrucksTrucksGetResponseItem,
   UpdateTruckTrucksTruckIdPatchResponse,
 } from "@/api/generated/index.zod"
 
@@ -19,8 +19,8 @@ export const trucksAPI = {
     }
 
     const trucks: TruckResponse[] = []
-    for (const i in data) {
-      const p = GetTrucksTrucksGetResponse.safeParse(i)
+    for (const i of data) {
+      const p = GetTrucksTrucksGetResponseItem.safeParse(i)
 
       if (p.success) {
         trucks.push(p.data)

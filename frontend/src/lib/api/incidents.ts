@@ -23,7 +23,7 @@ export const incidentsAPI = {
     }
 
     const incidents: IncidentResponse[] = []
-    for (const i in data) {
+    for (const i of data) {
       const p = GetIncidentsIncidentsGetResponseItem.safeParse(i)
 
       if (p.success) {
