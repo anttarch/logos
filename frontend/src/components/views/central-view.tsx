@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react"
+import { useMemo } from "react"
 import { InfoIcon, SearchIcon, ZapIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -23,10 +23,11 @@ import {
   IncidentStatus,
   type IncidentResponse,
 } from "@/api/model"
-import { CriticalityBadge } from "@/components/criticality-badge"
-import { StatusBadge } from "@/components/status-badge"
-import { CategoryIcon } from "@/components/category-icon"
-import { IncidentsView } from "@/components/views/incidents-view"
+import { useIncidentFilters } from "@/hooks/use-incident-filters"
+import { CriticalityBadge } from "../criticality-badge"
+import { StatusBadge } from "../status-badge"
+import { CategoryIcon } from "../category-icon"
+import { IncidentsView } from "./incidents-view"
 
 interface CentralViewProps {
   incidents: IncidentResponse[]
@@ -74,10 +75,17 @@ export function CentralView({
   onReleaseLock,
   onAddNote,
 }: CentralViewProps) {
-  const [search, setSearch] = useState("")
-  const [critFilter, setCritFilter] = useState<IncidentCriticality | null>(null)
-  const [catFilter, setCatFilter] = useState<IncidentCategory | null>(null)
-  const [statusFilter, setStatusFilter] = useState<IncidentStatus | null>(null)
+  const {
+    search,
+    setSearch,
+    critFilter,
+    setCritFilter,
+    catFilter,
+    setCatFilter,
+    statusFilter,
+    setStatusFilter,
+    filteredIncidents: filteredQueue,
+  } = useIncidentFilters(incidents)
 
   const unattendedCritical = useMemo(
     () =>
@@ -90,23 +98,6 @@ export function CentralView({
         .slice(0, 5),
     [incidents]
   )
-
-  const filteredQueue = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    return incidents.filter((inc) => {
-      const matchSearch =
-        !q ||
-        `#${inc.id.toString()}`.includes(q) ||
-        inc.title.toLowerCase().includes(q) ||
-        inc.truck.plate.toLowerCase().includes(q) ||
-        inc.truck.model.toLowerCase().includes(q) ||
-        inc.location.toLowerCase().includes(q)
-      const matchCrit = critFilter == null || inc.criticality === critFilter
-      const matchCat = catFilter == null || inc.category === catFilter
-      const matchStatus = statusFilter == null || inc.status === statusFilter
-      return matchSearch && matchCrit && matchCat && matchStatus
-    })
-  }, [incidents, search, critFilter, catFilter, statusFilter])
 
   if (selectedIncidentId !== null) {
     return (
