@@ -23,8 +23,12 @@ async def get_trucks(db: SessionDep):
     responses={HTTPStatus.CONFLICT: {}},
 )
 async def create_truck(db: SessionDep, truck_create: TruckCreate):
-    plate = select(Truck).where(Truck.plate == truck_create.plate).exists().bool_op
-    if plate:
+    plate_exists = (
+        await db.execute(
+            select(select(Truck).where(Truck.plate == truck_create.plate).exists())
+        )
+    ).scalar()
+    if plate_exists:
         raise HTTPException(
             status_code=HTTPStatus.CONFLICT, detail="Plate already exists"
         )

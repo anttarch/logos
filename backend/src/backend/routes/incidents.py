@@ -56,8 +56,12 @@ async def get_incidents(
     responses={HTTPStatus.NOT_FOUND: {}},
 )
 async def create_incident(db: SessionDep, incident_create: IncidentCreate):
-    truck = select(Truck).where(Truck.id == incident_create.truck_id).exists().bool_op
-    if not truck:
+    truck_exists = (
+        await db.execute(
+            select(select(Truck).where(Truck.id == incident_create.truck_id).exists())
+        )
+    ).scalar()
+    if not truck_exists:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Truck not found")
 
     incident = Incident(**incident_create.model_dump())
