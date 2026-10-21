@@ -43,6 +43,7 @@ export const GetIncidentsIncidentsGetResponseItem = zod.object({
   "id": zod.int(),
   "status": zod.enum(['OPEN', 'CLOSED', 'UNDER_INVESTIGATION', 'INCONCLUSIVE']),
   "version": zod.int(),
+  "assigned_to": zod.union([zod.string(),zod.null()]).optional(),
   "truck": zod.object({
   "plate": zod.string().min(getIncidentsIncidentsGetResponseTruckPlateMin).max(getIncidentsIncidentsGetResponseTruckPlateMax),
   "driver_name": zod.string().min(getIncidentsIncidentsGetResponseTruckDriverNameMin).max(getIncidentsIncidentsGetResponseTruckDriverNameMax),
@@ -105,6 +106,7 @@ export const CreateIncidentIncidentsPostResponse = zod.object({
   "id": zod.int(),
   "status": zod.enum(['OPEN', 'CLOSED', 'UNDER_INVESTIGATION', 'INCONCLUSIVE']),
   "version": zod.int(),
+  "assigned_to": zod.union([zod.string(),zod.null()]).optional(),
   "truck": zod.object({
   "plate": zod.string().min(createIncidentIncidentsPostResponseTruckPlateMin).max(createIncidentIncidentsPostResponseTruckPlateMax),
   "driver_name": zod.string().min(createIncidentIncidentsPostResponseTruckDriverNameMin).max(createIncidentIncidentsPostResponseTruckDriverNameMax),
@@ -130,7 +132,8 @@ export const UpdateIncidentIncidentsIncidentIdPatchParams = zod.object({
 
 export const UpdateIncidentIncidentsIncidentIdPatchBody = zod.object({
   "version": zod.int().min(1),
-  "status": zod.union([zod.enum(['OPEN', 'CLOSED', 'UNDER_INVESTIGATION', 'INCONCLUSIVE']),zod.null()]).optional()
+  "status": zod.union([zod.enum(['OPEN', 'CLOSED', 'UNDER_INVESTIGATION', 'INCONCLUSIVE']),zod.null()]).optional(),
+  "assigned_to": zod.union([zod.string(),zod.null()]).optional()
 })
 
 export const updateIncidentIncidentsIncidentIdPatchResponseTitleMin = 3;
@@ -160,6 +163,7 @@ export const UpdateIncidentIncidentsIncidentIdPatchResponse = zod.object({
   "id": zod.int(),
   "status": zod.enum(['OPEN', 'CLOSED', 'UNDER_INVESTIGATION', 'INCONCLUSIVE']),
   "version": zod.int(),
+  "assigned_to": zod.union([zod.string(),zod.null()]).optional(),
   "truck": zod.object({
   "plate": zod.string().min(updateIncidentIncidentsIncidentIdPatchResponseTruckPlateMin).max(updateIncidentIncidentsIncidentIdPatchResponseTruckPlateMax),
   "driver_name": zod.string().min(updateIncidentIncidentsIncidentIdPatchResponseTruckDriverNameMin).max(updateIncidentIncidentsIncidentIdPatchResponseTruckDriverNameMax),

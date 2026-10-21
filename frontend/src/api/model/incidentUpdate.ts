@@ -10,4 +10,5 @@ export interface IncidentUpdate {
   /** @minimum 1 */
   version: number;
   status?: IncidentStatus | null;
+  assigned_to?: string | null;
 }

@@ -24,6 +24,7 @@ export interface IncidentResponse {
   id: number;
   status: IncidentStatus;
   version: number;
+  assigned_to?: string | null;
   truck: TruckResponse;
   created_at: string;
   updated_at: string;
