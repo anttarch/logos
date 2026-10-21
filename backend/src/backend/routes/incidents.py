@@ -79,7 +79,7 @@ async def create_incident(db: SessionDep, incident_create: IncidentCreate):
     await db.commit()
     await db.refresh(incident)
     json = IncidentResponse.model_validate(incident).model_dump(mode="json")
-    await ws.broadcast({"type": "NEW_INCIDENT", "payload": json})
+    await ws.broadcast({"event": "NEW_INCIDENT", "payload": json})
     return json
 
 
@@ -120,5 +120,5 @@ async def update_incident(
     changed = await db.scalar(stmt)
     await db.commit()
     json = IncidentResponse.model_validate(changed).model_dump(mode="json")
-    await ws.broadcast({"type": "PATCH_INCIDENT", "payload": json})
+    await ws.broadcast({"event": "PATCH_INCIDENT", "payload": json})
     return json
