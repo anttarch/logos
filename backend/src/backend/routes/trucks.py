@@ -42,13 +42,17 @@ def create_truck(db: SessionDep, truck_create: TruckCreate):
     responses={HTTPStatus.NOT_FOUND: {}},
 )
 def update_truck(db: SessionDep, truck_id: int, truck_update: TruckUpdate):
-    truck = db.query(exists().where(Truck.id == truck_id)).scalar()
+    truck = db.get(Truck, truck_id)
     if not truck:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Truck not found")
 
     new_data = truck_update.model_dump(exclude_unset=True)
-    stmt = update(Truck).where(Truck.id == truck_id).values(new_data).returning(Truck)
+    if not new_data:
+        # retorna o truck encontrado, sem alterações
+        return TruckResponse.model_validate(truck).model_dump(mode="json")
 
+    stmt = update(Truck).where(Truck.id == truck_id).values(new_data).returning(Truck)
     changed = db.execute(stmt).scalar_one()
     db.commit()
+
     return TruckResponse.model_validate(changed).model_dump(mode="json")

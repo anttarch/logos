@@ -73,27 +73,32 @@ def create_incident(db: SessionDep, incident_create: IncidentCreate):
     responses={HTTPStatus.NOT_FOUND: {}, HTTPStatus.CONFLICT: {}},
 )
 def update_incident(db: SessionDep, incident_id: int, incident_update: IncidentUpdate):
-    incident = db.query(exists().where(Incident.id == incident_id)).scalar()
+    incident = db.get(Incident, incident_id)
     if not incident:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="Incident not found"
         )
 
+    # primeira verificação: rejeita versões diferentes de início
+    if incident.version != incident_update.version:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT, detail="Incident is outdated"
+        )
+
     new_data = incident_update.model_dump(exclude_unset=True, exclude_none=True)
+    if not new_data:
+        # retorna o incident encontrado, sem alterações
+        return IncidentResponse.model_validate(incident).model_dump(mode="json")
+
     new_data["version"] = incident_update.version + 1
     stmt = (
         update(Incident)
+        # segunda verificação: caso o valor desde a primeira
         .where(Incident.id == incident_id, Incident.version == incident_update.version)
         .values(new_data)
         .returning(Incident)
     )
 
     changed = db.execute(stmt).scalar()
-
-    if not changed:
-        raise HTTPException(
-            status_code=HTTPStatus.CONFLICT, detail="Incident is outdated"
-        )
-
     db.commit()
     return IncidentResponse.model_validate(changed).model_dump(mode="json")
