@@ -23,6 +23,13 @@ export default defineConfig({
       client: "zod",
       target: "src/api/generated",
       fileExtension: ".zod.ts",
+      override: {
+        zod: {
+          dateTimeOptions: {
+            local: true,
+          },
+        },
+      },
     },
   },
 })

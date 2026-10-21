@@ -1,4 +1,4 @@
-export const API_BASE = import.meta.env.BACKEND_URL || "http://localhost:8000/"
+export const API_BASE = import.meta.env.BACKEND_URL || "http://localhost:8000"
 
 async function fetchTimeout(
   url: string,
@@ -8,7 +8,7 @@ async function fetchTimeout(
   const controller = new AbortController()
   const id = setTimeout(() => controller.abort(), timeout)
   try {
-    const response = await fetch(`${API_BASE}/${url}`, {
+    const response = await fetch(`${API_BASE}${url}`, {
       ...options,
       signal: controller.signal,
     })

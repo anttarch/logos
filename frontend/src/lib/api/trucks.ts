@@ -8,12 +8,12 @@ import {
 
 export const trucksAPI = {
   async getTrucks(): Promise<TruckResponse[]> {
-    const res = await fetchRetry("trucks")
+    const res = await fetchRetry("/trucks")
     if (!res.ok) {
       throw new Error(`Failed to get trucks ${res.status}`)
     }
 
-    const data = await res.json()
+    const data: unknown = await res.json()
     if (!Array.isArray(data)) {
       throw new Error("Weird data")
     }
@@ -21,6 +21,7 @@ export const trucksAPI = {
     const trucks: TruckResponse[] = []
     for (const i of data) {
       const p = GetTrucksTrucksGetResponseItem.safeParse(i)
+      console.log(`${p.error} as`)
 
       if (p.success) {
         trucks.push(p.data)
@@ -31,7 +32,7 @@ export const trucksAPI = {
   },
 
   async createTruck(payload: TruckCreate): Promise<TruckResponse> {
-    const res = await fetchRetry("trucks", {
+    const res = await fetchRetry("/trucks", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -51,7 +52,7 @@ export const trucksAPI = {
   },
 
   async updateTruck(id: number, payload: TruckUpdate): Promise<TruckResponse> {
-    const res = await fetchRetry(`trucks/${id}`, {
+    const res = await fetchRetry(`/trucks/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -68,6 +69,6 @@ export const trucksAPI = {
       return p.data
     }
 
-    throw new Error(`Failed to parse updateTruck response`)
+    throw new Error(`Failed to parse updateTruck response: ${p.error}`)
   },
 }

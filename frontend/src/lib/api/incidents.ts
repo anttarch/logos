@@ -12,7 +12,7 @@ import {
 
 export const incidentsAPI = {
   async getIncidents(): Promise<IncidentResponse[]> {
-    const res = await fetchRetry("incidents")
+    const res = await fetchRetry("/incidents")
     if (!res.ok) {
       throw new Error(`Failed to get incidents ${res.status}`)
     }
@@ -35,7 +35,7 @@ export const incidentsAPI = {
   },
 
   async createIncident(payload: IncidentCreate): Promise<IncidentResponse> {
-    const res = await fetchRetry("incidents", {
+    const res = await fetchRetry("/incidents", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -58,7 +58,7 @@ export const incidentsAPI = {
     id: number,
     payload: IncidentUpdate
   ): Promise<IncidentResponse> {
-    const res = await fetchRetry(`incidents/${id}`, {
+    const res = await fetchRetry(`/incidents/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
