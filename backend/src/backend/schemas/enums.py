@@ -18,7 +18,7 @@ class IncidentStatus(str, Enum):
     INCONCLUSIVE = "INCONCLUSIVE"  # Inconclusivo
 
 
-class Criticality(str, Enum):
+class IncidentCriticality(str, Enum):
     HIGH = "HIGH"  # Alta
     MEDIUM = "MEDIUM"  # Média
     LOW = "LOW"  # Baixa

@@ -7,9 +7,9 @@ from sqlalchemy import exists, select, update
 from ..database import SessionDep
 from ..models import Incident, Truck
 from ..schemas import (
-    Criticality,
     IncidentCategory,
     IncidentCreate,
+    IncidentCriticality,
     IncidentResponse,
     IncidentStatus,
     IncidentUpdate,
@@ -23,7 +23,7 @@ def get_incidents(
     db: SessionDep,
     category: IncidentCategory | None = None,
     status: IncidentStatus | None = None,
-    criticality: Criticality | None = None,
+    criticality: IncidentCriticality | None = None,
 ):
     query = select(Incident)
 
@@ -35,9 +35,9 @@ def get_incidents(
         query = query.where(Incident.criticality == criticality)
 
     criticality_ordering = sql_case(
-        (Incident.criticality == Criticality.HIGH, 3),
-        (Incident.criticality == Criticality.MEDIUM, 2),
-        (Incident.criticality == Criticality.LOW, 1),
+        (Incident.criticality == IncidentCriticality.HIGH, 3),
+        (Incident.criticality == IncidentCriticality.MEDIUM, 2),
+        (Incident.criticality == IncidentCriticality.LOW, 1),
     ).desc()
 
     query = query.order_by(criticality_ordering, Incident.created_at.desc())

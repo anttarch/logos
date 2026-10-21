@@ -5,7 +5,7 @@ from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy import Enum as DBEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from ..schemas.enums import Criticality, IncidentCategory, IncidentStatus
+from ..schemas.enums import IncidentCategory, IncidentCriticality, IncidentStatus
 from .base import Base, utcnow
 
 
@@ -21,8 +21,8 @@ class Incident(Base):
         nullable=False,
         index=True,
     )
-    criticality: Mapped[Criticality] = mapped_column(
-        DBEnum(Criticality),
+    criticality: Mapped[IncidentCriticality] = mapped_column(
+        DBEnum(IncidentCriticality),
         nullable=False,
         index=True,
     )

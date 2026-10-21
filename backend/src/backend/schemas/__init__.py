@@ -1,9 +1,9 @@
-from .enums import Criticality, IncidentCategory, IncidentStatus
+from .enums import IncidentCriticality, IncidentCategory, IncidentStatus
 from .incident import IncidentCreate, IncidentResponse, IncidentUpdate
 from .truck import TruckCreate, TruckResponse, TruckUpdate
 
 __all__ = [
-    "Criticality",
+    "IncidentCriticality",
     "IncidentCategory",
     "IncidentCreate",
     "IncidentResponse",
