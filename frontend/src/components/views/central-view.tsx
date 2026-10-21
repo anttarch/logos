@@ -34,7 +34,7 @@ import {
   type IncidentResponse,
 } from "@/api/model"
 
-interface TriageCentralViewProps {
+interface CentralViewProps {
   incidents: IncidentResponse[]
   onAssumeTriage: (incidentId: number) => void
   onSelectAndNavigate: (incidentId: number) => void
@@ -84,11 +84,11 @@ const status_items = [
   { label: "Inconclusivo", value: IncidentStatus.INCONCLUSIVE },
 ]
 
-export function TriageCentralView({
+export function CentralView({
   incidents,
   onAssumeTriage,
   onSelectAndNavigate,
-}: TriageCentralViewProps) {
+}: CentralViewProps) {
   const [search, setSearch] = useState("")
   const [critFilter, setCritFilter] = useState<IncidentCriticality | null>(null)
   const [catFilter, setCatFilter] = useState<IncidentCategory | null>(null)
@@ -128,93 +128,95 @@ export function TriageCentralView({
   return (
     <div className="space-y-6">
       {/* incidentes já associados ao usuario */}
-      <section className="space-y-3">
-        <Card className="border border-destructive/10 bg-destructive/10">
-          <CardContent className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-            <div className="flex items-center gap-3">
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-base font-semibold tracking-tight text-destructive">
-                    5 incidentes prioritários - Sem triagem
-                  </h2>
-                </div>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  Atualizado em tempo real
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="space-y-3">
-          {unattendedCritical.map((inc) => (
-            <Card
-              key={inc.id}
-              className="border-destructive/30 transition-colors"
-            >
-              <CardContent className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-                <div className="flex gap-3.5">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-destructive/30 bg-destructive/10">
-                    {getCategoryIcon(inc.category)}
+      {unattendedCritical.length > 0 && (
+        <section className="space-y-3">
+          <Card className="border border-destructive/10 bg-destructive/10">
+            <CardContent className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+              <div className="flex items-center gap-3">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="text-base font-semibold tracking-tight text-destructive">
+                      5 incidentes prioritários - Sem triagem
+                    </h2>
                   </div>
-                  <div className="space-y-1.5">
-                    <Badge className="rounded-sm bg-destructive text-[10px] font-extrabold text-white uppercase">
-                      ALTA
-                    </Badge>
-                    <h3 className="flex flex-wrap gap-2 text-[16px] font-extrabold text-foreground">
-                      {inc.title}
-                      <Badge
-                        variant="secondary"
-                        className="rounded-sm text-[10px] font-bold uppercase"
-                      >
-                        #{inc.id}
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Atualizado em tempo real
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-3">
+            {unattendedCritical.map((inc) => (
+              <Card
+                key={inc.id}
+                className="border-destructive/30 transition-colors"
+              >
+                <CardContent className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+                  <div className="flex gap-3.5">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-destructive/30 bg-destructive/10">
+                      {getCategoryIcon(inc.category)}
+                    </div>
+                    <div className="space-y-1.5">
+                      <Badge className="rounded-sm bg-destructive text-[10px] font-extrabold text-white uppercase">
+                        ALTA
                       </Badge>
-                    </h3>
-                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                      <span>
-                        Veículo:{" "}
-                        <strong className="text-foreground">
-                          {inc.truck.plate} ({inc.truck.model})
-                        </strong>
-                      </span>
-                      <span>•</span>
-                      <span>
-                        Local:{" "}
-                        <strong className="text-foreground">
-                          {inc.location}
-                        </strong>
-                      </span>
+                      <h3 className="flex flex-wrap gap-2 text-[16px] font-extrabold text-foreground">
+                        {inc.title}
+                        <Badge
+                          variant="secondary"
+                          className="rounded-sm text-[10px] font-bold uppercase"
+                        >
+                          #{inc.id}
+                        </Badge>
+                      </h3>
+                      <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                        <span>
+                          Veículo:{" "}
+                          <strong className="text-foreground">
+                            {inc.truck.plate} ({inc.truck.model})
+                          </strong>
+                        </span>
+                        <span>•</span>
+                        <span>
+                          Local:{" "}
+                          <strong className="text-foreground">
+                            {inc.location}
+                          </strong>
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex justify-end gap-3 border-t pt-3 md:flex-col md:justify-end md:gap-1 md:border-t-0 md:pt-0">
-                  <Button
-                    size="sm"
-                    onClick={() => onSelectAndNavigate(inc.id)}
-                    className="gap-1.5 md:w-full"
-                  >
-                    <InfoIcon className="size-3.5" />
-                    <span>Ver detalhes</span>
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onAssumeTriage(inc.id)
-                    }}
-                    className="gap-1.5 md:w-full"
-                  >
-                    <ZapIcon className="size-3.5" />
-                    <span>Assumir Triagem</span>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
+                  <div className="flex justify-end gap-3 border-t pt-3 md:flex-col md:justify-end md:gap-1 md:border-t-0 md:pt-0">
+                    <Button
+                      size="sm"
+                      onClick={() => onSelectAndNavigate(inc.id)}
+                      className="gap-1.5 md:w-full"
+                    >
+                      <InfoIcon className="size-3.5" />
+                      <span>Ver detalhes</span>
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onAssumeTriage(inc.id)
+                      }}
+                      className="gap-1.5 md:w-full"
+                    >
+                      <ZapIcon className="size-3.5" />
+                      <span>Assumir Triagem</span>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* migrar para pagina geral de incidentes */}
       <Card size="sm" className="bg-muted/30">
