@@ -1,11 +1,13 @@
 import { useState, useMemo } from "react"
 import {
   CarIcon,
+  CloudAlertIcon,
   FlameIcon,
   HeartPulseIcon,
   InfoIcon,
   SearchIcon,
   TrafficConeIcon,
+  WrenchIcon,
   ZapIcon,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -25,23 +27,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { Incident } from "@/types/incidents"
-import { Criticality, IncidentCategory, IncidentStatus } from "@/api/model"
+import {
+  IncidentCriticality,
+  IncidentCategory,
+  IncidentStatus,
+  type IncidentResponse,
+} from "@/api/model"
 
 interface TriageCentralViewProps {
-  incidents: Incident[]
-  onAssumeTriage: (incidentId: string) => void
-  onSelectAndNavigate: (incidentId: string) => void
+  incidents: IncidentResponse[]
+  onAssumeTriage: (incidentId: number) => void
+  onSelectAndNavigate: (incidentId: number) => void
 }
 
-function getCategoryIcon(category: Incident["category"]) {
+function getCategoryIcon(category: IncidentCategory) {
   switch (category) {
-    case "Acidente com Vítimas":
-      return <HeartPulseIcon className="size-5 text-destructive" />
-    case "Bloqueio de Pista":
-      return <TrafficConeIcon className="size-5 text-destructive" />
-    case "Acidente com Veículo":
+    case IncidentCategory.VEHICLE_ACCIDENT:
       return <FlameIcon className="size-5 text-amber-500" />
+    case IncidentCategory.VICTIM_ACCIDENT:
+      return <HeartPulseIcon className="size-5 text-destructive" />
+    case IncidentCategory.WEIRD_WEATHER_CONDITION:
+      return <CloudAlertIcon className="size-5 text-destructive" />
+    case IncidentCategory.MECHANICAL_ISSUE:
+      return <WrenchIcon className="size-5 text-destructive" />
+    case IncidentCategory.ROAD_BLOCK:
+      return <TrafficConeIcon className="size-5 text-destructive" />
     default:
       return <CarIcon className="size-5 text-destructive" />
   }
@@ -49,9 +59,9 @@ function getCategoryIcon(category: Incident["category"]) {
 
 const criticality_items = [
   { label: "Por Criticidade", value: null },
-  { label: "Alta Criticidade", value: Criticality.HIGH },
-  { label: "Média Criticidade", value: Criticality.MEDIUM },
-  { label: "Baixa Criticidade", value: Criticality.LOW },
+  { label: "Alta Criticidade", value: IncidentCriticality.HIGH },
+  { label: "Média Criticidade", value: IncidentCriticality.MEDIUM },
+  { label: "Baixa Criticidade", value: IncidentCriticality.LOW },
 ]
 
 const category_items = [
@@ -80,7 +90,7 @@ export function TriageCentralView({
   onSelectAndNavigate,
 }: TriageCentralViewProps) {
   const [search, setSearch] = useState("")
-  const [critFilter, setCritFilter] = useState<Criticality | null>(null)
+  const [critFilter, setCritFilter] = useState<IncidentCriticality | null>(null)
   const [catFilter, setCatFilter] = useState<IncidentCategory | null>(null)
   const [statusFilter, setStatusFilter] = useState<IncidentStatus | null>(null)
 
@@ -89,9 +99,10 @@ export function TriageCentralView({
       incidents
         .filter(
           (inc) =>
-            inc.criticality === "Alta" &&
+            inc.criticality == IncidentCriticality.HIGH &&
             !inc.lockedBy &&
-            inc.status !== "Fechado"
+            inc.status != IncidentStatus.CLOSED &&
+            inc.status != IncidentStatus.INCONCLUSIVE
         )
         .slice(0, 5),
     [incidents]
@@ -102,9 +113,10 @@ export function TriageCentralView({
     return incidents.filter((inc) => {
       const matchSearch =
         !q ||
-        inc.id.toLowerCase().includes(q) ||
+        inc.id.toString().includes(q) ||
         inc.title.toLowerCase().includes(q) ||
-        inc.vehiclePlate.toLowerCase().includes(q) ||
+        inc.truck.plate.toLowerCase().includes(q) ||
+        inc.truck.model.toLowerCase().includes(q) ||
         inc.location.toLowerCase().includes(q)
       const matchCrit = critFilter == null || inc.criticality === critFilter
       const matchCat = catFilter == null || inc.category === catFilter
@@ -162,7 +174,7 @@ export function TriageCentralView({
                       <span>
                         Veículo:{" "}
                         <strong className="text-foreground">
-                          {inc.vehiclePlate} ({inc.vehicleModel})
+                          {inc.truck.plate} ({inc.truck.model})
                         </strong>
                       </span>
                       <span>•</span>
@@ -306,7 +318,7 @@ export function TriageCentralView({
                 <CardContent className="flex flex-col gap-2">
                   <CardTitle>{inc.title}</CardTitle>
                   <CardDescription className="text-xs">
-                    {inc.vehiclePlate} • {inc.location}
+                    {inc.truck.plate} • {inc.location}
                   </CardDescription>
                 </CardContent>
               </Card>
