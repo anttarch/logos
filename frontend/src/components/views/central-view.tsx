@@ -23,10 +23,10 @@ import {
   IncidentStatus,
   type IncidentResponse,
 } from "@/api/model"
-import { CriticalityBadge } from "../criticality-badge"
-import { StatusBadge } from "../status-badge"
-import { CategoryIcon } from "../category-icon"
-import { IncidentsView } from "./incidents-view"
+import { CriticalityBadge } from "@/components/criticality-badge"
+import { StatusBadge } from "@/components/status-badge"
+import { CategoryIcon } from "@/components/category-icon"
+import { IncidentsView } from "@/components/views/incidents-view"
 
 interface CentralViewProps {
   incidents: IncidentResponse[]

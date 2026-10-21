@@ -10,9 +10,9 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { IncidentStatus, type IncidentResponse } from "@/api/model"
-import { CriticalityBadge } from "../criticality-badge"
+import { CriticalityBadge } from "@/components/criticality-badge"
 import { categoryToString, statusToString } from "@/lib/utils"
-import { CategoryIcon } from "../category-icon"
+import { CategoryIcon } from "@/components/category-icon"
 
 interface IncidentsViewProps {
   incidents: IncidentResponse[]
