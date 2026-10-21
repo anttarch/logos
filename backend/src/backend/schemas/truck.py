@@ -8,6 +8,7 @@ class TruckBase(BaseModel):
     plate: str = Field(min_length=7, max_length=7)
     driver_name: str = Field(min_length=3, max_length=120)
     location: str = Field(max_length=255)
+    model: str = Field(max_length=120)
 
 
 # pra GET

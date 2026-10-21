@@ -14,6 +14,7 @@ class Truck(Base):
         primary_key=True,
         autoincrement=True,
     )
+    model: Mapped[str] = mapped_column(String(30), nullable=False)
     plate: Mapped[str] = mapped_column(String(7), unique=True, index=True)
     driver_name: Mapped[str] = mapped_column(String(120), nullable=True)
     location: Mapped[str] = mapped_column(String(255), nullable=True)
