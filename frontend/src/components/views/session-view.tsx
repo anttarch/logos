@@ -3,48 +3,45 @@ import { CheckIcon, WrenchIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { UserRole, type UserSession } from "@/types/session"
+import { Field, FieldLabel } from "@/components/ui/field"
 
-interface AnalystSessionViewProps {
+interface SessionViewProps {
   user: UserSession
-  onStartTriage: (updated: UserSession) => void
-  onStartSupervisor?: () => void
+  onStart: (updated: UserSession) => void
   onCancel?: () => void
   hasActiveSession?: boolean
 }
 
-export function AnalystSessionView({
-  user,
-  onStartTriage,
-  onStartSupervisor,
-}: AnalystSessionViewProps) {
+export function SessionView({ user, onStart: onStart }: SessionViewProps) {
   const [nameInput, setNameInput] = React.useState(user.name)
 
   const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault()
     const trimmed = nameInput.trim() || "Larissa Rocha"
-    onStartTriage({
+    onStart({
       ...user,
       name: trimmed,
       role: UserRole.ANALYST,
     })
-    toast.success(`Sessão iniciada como ${trimmed}.`)
+    toast.add({
+      type: "success",
+      description: `Sessão iniciada como ${trimmed}.`,
+    })
   }
 
   const handleSupervisorClick = () => {
-    if (onStartSupervisor) {
-      onStartSupervisor()
-    } else {
-      onStartTriage({
-        ...user,
-        name: "Supervisor de Frota",
-        role: UserRole.SUPERVISOR,
-      })
-    }
-    toast.success("Modo Supervisor ativado.")
+    onStart({
+      ...user,
+      name: "Supervisor",
+      role: UserRole.SUPERVISOR,
+    })
+    toast.add({
+      type: "success",
+      description: "Modo Supervisor ativado.",
+    })
   }
 
   return (
@@ -65,10 +62,8 @@ export function AnalystSessionView({
             </p>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-2.5">
-              <Label htmlFor="analyst-name-page" className="text-xs">
-                Nome
-              </Label>
-              <div>
+              <Field>
+                <FieldLabel htmlFor="analyst-name-page">Nome</FieldLabel>
                 <Input
                   id="analyst-name-page"
                   required
@@ -76,7 +71,7 @@ export function AnalystSessionView({
                   onChange={(e) => setNameInput(e.target.value)}
                   placeholder="Digite o nome completo"
                 />
-              </div>
+              </Field>
               <Button type="submit" size="lg" className="w-full sm:w-auto">
                 <CheckIcon className="size-4" />
                 <span>Iniciar Triagem</span>
