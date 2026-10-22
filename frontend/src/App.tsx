@@ -33,6 +33,7 @@ export function App() {
     replaceIncident,
     lockAndAssume,
     releaseLock,
+    finishTriage,
     injectStressLoad,
     resetData,
     saveIncident,
@@ -100,6 +101,7 @@ export function App() {
                   onAssumeTriage={handleAssumeFromCentral}
                   onLockAndAssume={handleLockAndAssume}
                   onReleaseLock={releaseLock}
+                  onFinishTriage={finishTriage}
                   getViewersForIncident={getViewersForIncident}
                   currentUserName={user.name}
                 />

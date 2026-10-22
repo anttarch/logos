@@ -9,6 +9,7 @@ import { toast } from "@/components/ui/toast"
 import type { TestingFormPayload } from "@/components/views/testing-view"
 import { incidentsAPI } from "@/lib/api/incidents"
 import { trucksAPI } from "@/lib/api/trucks"
+import { statusToString } from "@/lib/utils"
 import {
   buildStressLoadPayloads,
   generateRandomPlate,
@@ -137,6 +138,42 @@ export function useIncidentsData() {
           ),
         })
         void refreshData()
+      }
+    },
+    [incidents, refreshData, replaceIncident]
+  )
+
+  const finishTriage = useCallback(
+    async (
+      id: number,
+      status: IncidentStatus,
+      notes: string
+    ): Promise<boolean> => {
+      const target = incidents.find((inc) => inc.id === id)
+      if (!target) return false
+
+      try {
+        const updated = await incidentsAPI.updateIncident(id, {
+          version: target.version,
+          status,
+          notes,
+        })
+        replaceIncident(updated)
+        toast.add({
+          type: "success",
+          description: `Triagem do incidente #${id} finalizada como ${statusToString(status)}.`,
+        })
+        return true
+      } catch (err) {
+        toast.add({
+          type: "error",
+          description: getErrorMessage(
+            err,
+            `Falha ao finalizar a triagem do incidente #${id}.`
+          ),
+        })
+        void refreshData()
+        return false
       }
     },
     [incidents, refreshData, replaceIncident]
@@ -308,6 +345,7 @@ export function useIncidentsData() {
     replaceIncident,
     lockAndAssume,
     releaseLock,
+    finishTriage,
     updateStatus,
     injectStressLoad,
     resetData,

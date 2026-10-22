@@ -1,5 +1,5 @@
-import { useMemo } from "react"
-import { EyeIcon, LockIcon } from "lucide-react"
+import { useMemo, useState } from "react"
+import { CheckIcon, EyeIcon, Loader2Icon, LockIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
@@ -10,7 +10,16 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
-import type { IncidentResponse } from "@/api/model"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import { IncidentStatus, type IncidentResponse } from "@/api/model"
 import { CriticalityBadge } from "@/components/criticality-badge"
 import { categoryToString, statusToString } from "@/lib/utils"
 import { CategoryIcon } from "@/components/category-icon"
@@ -21,6 +30,11 @@ interface IncidentsViewProps {
   onBack?: () => void
   onLockAndAssume: (id: number) => void
   onReleaseLock: (id: number) => void
+  onFinishTriage: (
+    id: number,
+    status: IncidentStatus,
+    notes: string
+  ) => Promise<boolean>
   getViewersForIncident: (incidentId: number) => string[]
   currentUserName: string
 }
@@ -37,12 +51,11 @@ export function IncidentsView({
   onBack,
   onLockAndAssume,
   onReleaseLock,
+  onFinishTriage,
   getViewersForIncident,
   currentUserName,
   // onAddNote,
 }: IncidentsViewProps) {
-  // const [noteInput, setNoteInput] = useState("")
-
   const selectedIncident = useMemo(
     () =>
       incidents.find((i) => i.id === selectedIncidentId) ??
@@ -50,6 +63,12 @@ export function IncidentsView({
       null,
     [incidents, selectedIncidentId]
   )
+
+  const [noteInput, setNoteInput] = useState(
+    () => selectedIncident?.notes ?? ""
+  )
+  const [finishStatus, setFinishStatus] = useState<IncidentStatus | null>(null)
+  const [isFinishing, setIsFinishing] = useState(false)
 
   const otherViewers = useMemo(() => {
     if (!selectedIncident) return []
@@ -63,12 +82,21 @@ export function IncidentsView({
     ]
   }, [currentUserName, getViewersForIncident, selectedIncident])
 
-  // const handleSubmitNote = () => {
-  //   const trimmed = noteInput.trim()
-  //   if (!trimmed || !selectedIncident) return
-  //   onAddNote(selectedIncident.id, trimmed, notifySupervisor)
-  //   setNoteInput("")
-  // }
+  const handleFinishTriage = async () => {
+    if (!selectedIncident || !finishStatus || isFinishing) return
+
+    setIsFinishing(true)
+    const finished = await onFinishTriage(
+      selectedIncident.id,
+      finishStatus,
+      noteInput.trim()
+    )
+    setIsFinishing(false)
+
+    if (finished) {
+      setFinishStatus(null)
+    }
+  }
 
   const incidentDetails = [
     { label: "Status", value: statusToString(selectedIncident.status) },
@@ -199,48 +227,80 @@ export function IncidentsView({
           ))}
         </div>
 
-        <div className="pt-3">
+        <div className="flex items-center justify-between gap-2 pt-3">
           <span className="text-sm font-semibold tracking-wider text-foreground">
-            Notas Registradas
+            {isOwnedByCurrentUser ? "Finalizar Triagem" : "Notas Registradas"}
           </span>
-        </div>
-        <div className="rounded-md border bg-muted/20 p-3 text-xs whitespace-pre-wrap text-foreground">
-          {selectedIncident.notes || "Nenhuma nota operacional registrada."}
-        </div>
-
-        {/*<div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label
-              htmlFor="operational-note-input"
-              className="text-xs font-medium"
-            >
-              Registrar Nota Operacional
-            </Label>
+          {isOwnedByCurrentUser && (
             <span className="font-mono text-[10px] text-muted-foreground">
-              Salvo no log permanente
+              Notas e status são salvos juntos
             </span>
-          </div>
+          )}
+        </div>
 
-          <Textarea
-            id="operational-note-input"
-            rows={2}
-            value={noteInput}
-            onChange={(e) => setNoteInput(e.target.value)}
-            placeholder="Insira detalhes do contato com PRF, motorista ou seguradora..."
-            className="resize-none text-xs"
-          />
+        {isOwnedByCurrentUser ? (
+          <div className="space-y-3 rounded-md border bg-muted/20 p-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="triage-notes" className="text-xs font-medium">
+                Notas Operacionais
+              </Label>
+              <Textarea
+                id="triage-notes"
+                rows={3}
+                value={noteInput}
+                onChange={(e) => setNoteInput(e.target.value)}
+                placeholder="Registre o resultado da investigação, contatos e providências..."
+                className="resize-none text-xs"
+              />
+            </div>
 
-          <div className="flex items-center justify-between pt-1">
-            <Button
-              size="sm"
-              onClick={handleSubmitNote}
-              className="gap-1.5 text-xs"
-            >
-              <SendIcon className="size-3.5" />
-              <span>Registrar Nota</span>
-            </Button>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div className="w-full space-y-1.5 sm:max-w-60">
+                <Label htmlFor="triage-status" className="text-xs font-medium">
+                  Resultado
+                </Label>
+                <Select
+                  value={finishStatus}
+                  onValueChange={(value) => {
+                    if (value) setFinishStatus(value as IncidentStatus)
+                  }}
+                >
+                  <SelectTrigger id="triage-status" className="w-full text-xs">
+                    <SelectValue placeholder="Selecione o resultado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={IncidentStatus.CLOSED}>
+                      Fechado
+                    </SelectItem>
+                    <SelectItem value={IncidentStatus.INCONCLUSIVE}>
+                      Inconclusivo
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button
+                size="lg"
+                className="gap-1.5 text-xs"
+                disabled={finishStatus === null || isFinishing}
+                onClick={handleFinishTriage}
+              >
+                {isFinishing ? (
+                  <Loader2Icon className="size-3.5 animate-spin" />
+                ) : (
+                  <CheckIcon className="size-3.5" />
+                )}
+                <span>
+                  {isFinishing ? "Finalizando..." : "Finalizar Triagem"}
+                </span>
+              </Button>
+            </div>
           </div>
-        </div>*/}
+        ) : (
+          <div className="rounded-md border bg-muted/20 p-3 text-xs whitespace-pre-wrap text-foreground">
+            {selectedIncident.notes || "Nenhuma nota operacional registrada."}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-2 border-t pt-4">

@@ -36,6 +36,11 @@ interface CentralViewProps {
   onAssumeTriage: (incidentId: number) => void
   onLockAndAssume: (id: number) => void
   onReleaseLock: (id: number) => void
+  onFinishTriage: (
+    id: number,
+    status: IncidentStatus,
+    notes: string
+  ) => Promise<boolean>
   getViewersForIncident: (incidentId: number) => string[]
   currentUserName: string
 }
@@ -74,6 +79,7 @@ export function CentralView({
   onAssumeTriage,
   onLockAndAssume,
   onReleaseLock,
+  onFinishTriage,
   getViewersForIncident,
   currentUserName,
 }: CentralViewProps) {
@@ -104,11 +110,13 @@ export function CentralView({
   if (selectedIncidentId !== null) {
     return (
       <IncidentsView
+        key={selectedIncidentId}
         incidents={incidents}
         selectedIncidentId={selectedIncidentId}
         onBack={() => onSelectIncident(null)}
         onLockAndAssume={onLockAndAssume}
         onReleaseLock={onReleaseLock}
+        onFinishTriage={onFinishTriage}
         getViewersForIncident={getViewersForIncident}
         currentUserName={currentUserName}
       />
