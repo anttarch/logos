@@ -45,6 +45,20 @@ interface CentralViewProps {
   currentUserName: string
 }
 
+const criticality_rank: Record<IncidentCriticality, number> = {
+  [IncidentCriticality.HIGH]: 3,
+  [IncidentCriticality.MEDIUM]: 2,
+  [IncidentCriticality.LOW]: 1,
+}
+
+const category_rank: Record<IncidentCategory, number> = {
+  [IncidentCategory.VICTIM_ACCIDENT]: 5,
+  [IncidentCategory.VEHICLE_ACCIDENT]: 4,
+  [IncidentCategory.WEIRD_WEATHER_CONDITION]: 3,
+  [IncidentCategory.MECHANICAL_ISSUE]: 2,
+  [IncidentCategory.ROAD_BLOCK]: 1,
+}
+
 const criticality_items = [
   { label: "Por Criticidade", value: null },
   { label: "Alta Criticidade", value: IncidentCriticality.HIGH },
@@ -95,23 +109,28 @@ export function CentralView({
     filteredIncidents: filteredQueue,
   } = useIncidentFilters(incidents)
 
-  const unattendedCritical = useMemo(
-    () =>
-      incidents
-        .filter(
-          (inc) =>
-            inc.criticality === IncidentCriticality.HIGH &&
-            inc.status === IncidentStatus.OPEN
-        )
-        .slice(0, 5),
-    [incidents]
-  )
+  const priorityIncidents = useMemo(() => {
+    const openIncidents = incidents.filter(
+      (inc) => inc.status === IncidentStatus.OPEN
+    )
 
-  // Priority incidents are already rendered above. Keep them out of the main
-  // grid so the same incident never appears twice on this screen.
+    openIncidents.sort((a, b) => {
+      const criticalityDiff =
+        criticality_rank[b.criticality] - criticality_rank[a.criticality]
+      if (criticalityDiff !== 0) return criticalityDiff
+
+      const categoryDiff = category_rank[b.category] - category_rank[a.category]
+      if (categoryDiff !== 0) return categoryDiff
+
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    })
+
+    return openIncidents.slice(0, 5)
+  }, [incidents])
+
   const priorityIncidentIds = useMemo(
-    () => new Set(unattendedCritical.map((inc) => inc.id)),
-    [unattendedCritical]
+    () => new Set(priorityIncidents.map((inc) => inc.id)),
+    [priorityIncidents]
   )
 
   const remainingQueue = useMemo(
@@ -137,85 +156,89 @@ export function CentralView({
 
   return (
     <div className="space-y-6">
-      {/* incidentes já associados ao usuario */}
-      {unattendedCritical.length > 0 && (
-        <section className="space-y-3">
-          <Card className="border border-destructive/10 bg-destructive/10">
-            <CardContent className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-              <div className="flex items-center gap-3">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="text-base font-semibold tracking-tight text-destructive">
-                      {unattendedCritical.length} incidentes prioritários - Sem
-                      triagem
-                    </h2>
-                  </div>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    Atualizado em tempo real
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+      {priorityIncidents.length > 0 && (
+        <section className="space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-semibold tracking-tight">
+                Quadro de prioridades
+              </h2>
+              <Badge
+                variant="destructive"
+                className="rounded-sm text-[10px] font-extrabold"
+              >
+                {priorityIncidents.length}
+              </Badge>
+            </div>
+            <span className="text-[11px] text-muted-foreground">
+              Aguardando triagem
+            </span>
+          </div>
 
-          <div className="space-y-3">
-            {unattendedCritical.map((inc) => (
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-5">
+            {priorityIncidents.map((inc) => (
               <Card
                 key={inc.id}
-                className="border-destructive/30 transition-colors"
+                size="sm"
+                onClick={() => onSelectIncident(inc.id)}
+                className="h-full cursor-pointer ring-destructive/30 transition-colors hover:bg-border/30 hover:ring-destructive/50"
               >
-                <CardContent className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-                  <div className="flex gap-3.5">
+                <CardContent className="flex h-full flex-1 flex-col gap-2">
+                  <div className="flex items-start justify-between gap-2">
                     <CategoryIcon category={inc.category} />
-                    <div className="space-y-1.5">
+                    <div className="flex flex-wrap items-center justify-end gap-1">
                       <CriticalityBadge criticality={inc.criticality} />
-                      <h3 className="flex flex-wrap gap-2 text-[16px] font-extrabold text-foreground">
-                        {inc.title}
-                        <Badge
-                          variant="secondary"
-                          className="rounded-sm text-[10px] font-bold uppercase"
-                        >
-                          #{inc.id}
-                        </Badge>
-                      </h3>
-                      <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                        <span>
-                          Veículo:{" "}
-                          <strong className="text-foreground">
-                            {inc.truck.plate} ({inc.truck.model})
-                          </strong>
-                        </span>
-                        <span>•</span>
-                        <span>
-                          Local:{" "}
-                          <strong className="text-foreground">
-                            {inc.location}
-                          </strong>
-                        </span>
-                      </div>
+                      <Badge
+                        variant="secondary"
+                        className="rounded-sm text-[10px] font-bold uppercase"
+                      >
+                        #{inc.id}
+                      </Badge>
                     </div>
                   </div>
 
-                  <div className="flex justify-end gap-3 border-t pt-3 md:flex-col md:justify-end md:gap-1 md:border-t-0 md:pt-0">
-                    <Button
-                      size="sm"
-                      onClick={() => onSelectIncident(inc.id)}
-                      className="gap-1.5 md:w-full"
+                  <div className="space-y-1">
+                    <h3
+                      className="line-clamp-2 text-sm leading-tight font-bold text-foreground"
+                      title={inc.title}
                     >
-                      <InfoIcon className="size-3.5" />
-                      <span>Ver detalhes</span>
+                      {inc.title}
+                    </h3>
+                    <p
+                      className="truncate text-[11px] text-muted-foreground"
+                      title={`${inc.truck.plate} (${inc.truck.model}) • ${inc.location}`}
+                    >
+                      <strong className="text-foreground">
+                        {inc.truck.plate}
+                      </strong>{" "}
+                      • {inc.location}
+                    </p>
+                  </div>
+
+                  <div className="mt-auto flex gap-1.5 pt-1">
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      className="flex-1 px-1"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onSelectIncident(inc.id)
+                      }}
+                    >
+                      <InfoIcon className="size-3" />
+                      <span>Ver</span>
                     </Button>
                     <Button
                       variant="destructive"
-                      size="sm"
+                      size="xs"
+                      className="flex-1 px-1"
                       onClick={(e) => {
                         e.stopPropagation()
                         onAssumeTriage(inc.id)
                       }}
-                      className="gap-1.5 md:w-full"
                     >
-                      <ZapIcon className="size-3.5" />
-                      <span>Assumir Triagem</span>
+                      <ZapIcon className="size-3" />
+                      <span>Assumir</span>
                     </Button>
                   </div>
                 </CardContent>
