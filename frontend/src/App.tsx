@@ -51,7 +51,7 @@ export function App() {
       ? selectedIncidentId
       : null
 
-  const { getViewersForIncident } = usePresence({
+  const { getViewersForIncident, isConnected } = usePresence({
     viewedIncidentId,
     userName: user.name,
     enabled: !requiresLogin,
@@ -86,6 +86,7 @@ export function App() {
             onLogOut={openLoginPage}
             criticalUnattendedCount={criticalUnattendedCount}
             minimal={requiresLogin}
+            isConnected={isConnected}
           />
 
           {requiresLogin ? (
@@ -123,7 +124,7 @@ export function App() {
             </main>
           )}
 
-          <Footer />
+          <Footer userName={user.name} />
         </div>
         <Toaster />
       </ToastProvider>
