@@ -20,6 +20,54 @@ function getErrorMessage(err: unknown, fallback: string): string {
   return err instanceof Error ? err.message : fallback
 }
 
+/**
+ * Prepend incidents, keeping a single entry per id. The same incident can
+ * arrive through both the HTTP response and the NEW_INCIDENT websocket event.
+ */
+function mergeIncidents(
+  previous: IncidentResponse[],
+  incoming: IncidentResponse[]
+): IncidentResponse[] {
+  const incomingIds = new Set<number>()
+  const uniqueIncoming = incoming.filter((incident) => {
+    if (incomingIds.has(incident.id)) return false
+    incomingIds.add(incident.id)
+    return true
+  })
+
+  return [
+    ...uniqueIncoming,
+    ...previous.filter((incident) => !incomingIds.has(incident.id)),
+  ]
+}
+
+/** Replace an incident in place, also removing any duplicated entries. */
+function upsertIncident(
+  previous: IncidentResponse[],
+  updated: IncidentResponse
+): IncidentResponse[] {
+  let replaced = false
+  const next: IncidentResponse[] = []
+
+  for (const incident of previous) {
+    if (incident.id !== updated.id) {
+      next.push(incident)
+      continue
+    }
+
+    if (!replaced) {
+      next.push(updated)
+      replaced = true
+    }
+  }
+
+  return replaced ? next : [updated, ...next]
+}
+
+function dedupeIncidents(incidents: IncidentResponse[]): IncidentResponse[] {
+  return mergeIncidents([], incidents)
+}
+
 export function useIncidentsData() {
   const [incidents, setIncidents] = useState<IncidentResponse[]>([])
   const [fleet, setFleet] = useState<TruckResponse[]>([])
@@ -30,7 +78,7 @@ export function useIncidentsData() {
         incidentsAPI.getIncidents(),
         trucksAPI.getTrucks(),
       ])
-      setIncidents(loadedIncidents)
+      setIncidents(dedupeIncidents(loadedIncidents))
       setFleet(loadedTrucks)
     } catch (err) {
       toast.add({
@@ -46,7 +94,7 @@ export function useIncidentsData() {
     Promise.all([incidentsAPI.getIncidents(), trucksAPI.getTrucks()])
       .then(([loadedIncidents, loadedTrucks]) => {
         if (cancelled) return
-        setIncidents(loadedIncidents)
+        setIncidents(dedupeIncidents(loadedIncidents))
         setFleet(loadedTrucks)
       })
       .catch((err: unknown) => {
@@ -73,15 +121,11 @@ export function useIncidentsData() {
   )
 
   const prependIncident = useCallback((created: IncidentResponse) => {
-    setIncidents((prev) =>
-      prev.some((inc) => inc.id === created.id) ? prev : [created, ...prev]
-    )
+    setIncidents((prev) => mergeIncidents(prev, [created]))
   }, [])
 
   const replaceIncident = useCallback((updated: IncidentResponse) => {
-    setIncidents((prev) =>
-      prev.map((inc) => (inc.id === updated.id ? updated : inc))
-    )
+    setIncidents((prev) => upsertIncident(prev, updated))
   }, [])
 
   const lockAndAssume = useCallback(
@@ -232,24 +276,63 @@ export function useIncidentsData() {
 
   const injectStressLoad = useCallback(async () => {
     try {
-      const targetTruck =
-        fleet[0] ??
-        (await ensureTruck(
-          generateRandomPlate(),
-          "Scania R450",
-          "Motorista Frota #1",
-          "BR-116 KM 100"
-        ))
+      let targetTruck = fleet[0]
+
+      // The initial fleet request may still be in flight. Fetch it before
+      // falling back to creating a truck, so the first click works reliably.
+      if (!targetTruck) {
+        const loadedTrucks = await trucksAPI.getTrucks()
+        setFleet(loadedTrucks)
+        targetTruck =
+          loadedTrucks[0] ??
+          (await ensureTruck(
+            generateRandomPlate(),
+            "Scania R450",
+            "Motorista Frota #1",
+            "BR-116 KM 100"
+          ))
+      }
 
       const payloads = buildStressLoadPayloads(targetTruck.id, 10)
-      const created = await Promise.all(
-        payloads.map((payload) => incidentsAPI.createIncident(payload))
-      )
-      setIncidents((prev) => [...created, ...prev])
-      toast.add({
-        type: "success",
-        description: `${created.length} incidentes injetados!`,
-      })
+      const created: IncidentResponse[] = []
+      let failed = 0
+      let lastError: unknown = null
+
+      // Create sequentially: concurrent SQLite writes can fail under load,
+      // which previously aborted the whole batch.
+      for (const payload of payloads) {
+        try {
+          created.push(await incidentsAPI.createIncident(payload))
+        } catch (err) {
+          failed += 1
+          lastError = err
+        }
+      }
+
+      if (created.length > 0) {
+        setIncidents((prev) => mergeIncidents(prev, created))
+      }
+
+      if (failed === 0) {
+        toast.add({
+          type: "success",
+          description: `${created.length} incidentes injetados!`,
+        })
+      } else if (created.length > 0) {
+        toast.add({
+          type: "warning",
+          description: `${created.length} incidentes injetados, mas ${failed} falharam.`,
+        })
+        void refreshData()
+      } else {
+        toast.add({
+          type: "error",
+          description: getErrorMessage(
+            lastError,
+            "Falha ao injetar incidentes na API."
+          ),
+        })
+      }
     } catch (err) {
       toast.add({
         type: "error",
@@ -259,7 +342,7 @@ export function useIncidentsData() {
         ),
       })
     }
-  }, [ensureTruck, fleet])
+  }, [ensureTruck, fleet, refreshData])
 
   const resetData = useCallback(async () => {
     await refreshData()
@@ -321,7 +404,7 @@ export function useIncidentsData() {
             truck_id: truck.id,
           })
 
-          setIncidents((prev) => [created, ...prev])
+          setIncidents((prev) => mergeIncidents(prev, [created]))
           toast.add({
             type: "success",
             description: `Novo incidente #${created.id} criado com sucesso.`,

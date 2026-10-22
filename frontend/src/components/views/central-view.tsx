@@ -107,6 +107,18 @@ export function CentralView({
     [incidents]
   )
 
+  // Priority incidents are already rendered above. Keep them out of the main
+  // grid so the same incident never appears twice on this screen.
+  const priorityIncidentIds = useMemo(
+    () => new Set(unattendedCritical.map((inc) => inc.id)),
+    [unattendedCritical]
+  )
+
+  const remainingQueue = useMemo(
+    () => filteredQueue.filter((inc) => !priorityIncidentIds.has(inc.id)),
+    [filteredQueue, priorityIncidentIds]
+  )
+
   if (selectedIncidentId !== null) {
     return (
       <IncidentsView
@@ -281,7 +293,7 @@ export function CentralView({
       </Card>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-        {filteredQueue.map((inc) => {
+        {remainingQueue.map((inc) => {
           const owner = inc.assigned_to ?? null
           const otherViewers = owner
             ? []
