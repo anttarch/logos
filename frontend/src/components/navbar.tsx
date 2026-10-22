@@ -19,6 +19,7 @@ interface NavbarProps {
   onLogOut?: () => void
   criticalUnattendedCount?: number
   minimal?: boolean
+  isConnected?: boolean
 }
 
 export function Navbar({
@@ -26,6 +27,7 @@ export function Navbar({
   onViewChange,
   onLogOut: onLogOut,
   minimal = false,
+  isConnected = false,
 }: NavbarProps) {
   const { theme, setTheme } = useTheme()
 
@@ -72,13 +74,31 @@ export function Navbar({
             <>
               <Badge
                 variant="outline"
-                className="hidden h-7 items-center gap-2 rounded-lg bg-muted/40 px-2.5 py-1 text-xs sm:inline-flex"
+                aria-live="polite"
+                title={
+                  isConnected
+                    ? "Conexão em tempo real ativa"
+                    : "Sem conexão em tempo real"
+                }
+                className={
+                  isConnected
+                    ? "hidden h-7 items-center gap-2 rounded-lg bg-muted/40 px-2.5 py-1 text-xs sm:inline-flex"
+                    : "hidden h-7 items-center gap-2 rounded-lg border-destructive/30 bg-destructive/10 px-2.5 py-1 text-xs text-destructive sm:inline-flex"
+                }
               >
                 <span className="relative flex size-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+                  {isConnected && (
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  )}
+                  <span
+                    className={
+                      isConnected
+                        ? "relative inline-flex size-2 rounded-full bg-emerald-500"
+                        : "relative inline-flex size-2 rounded-full bg-destructive"
+                    }
+                  />
                 </span>
-                <span>Conectado</span>
+                <span>{isConnected ? "Conectado" : "Desconectado"}</span>
               </Badge>
 
               {onLogOut && (
