@@ -1,5 +1,13 @@
 import { useMemo } from "react"
-import { EyeIcon, InfoIcon, LockIcon, SearchIcon, ZapIcon } from "lucide-react"
+import {
+  EyeIcon,
+  InboxIcon,
+  InfoIcon,
+  LockIcon,
+  SearchIcon,
+  ShieldCheckIcon,
+  ZapIcon,
+} from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -156,6 +164,38 @@ export function CentralView({
 
   return (
     <div className="space-y-6">
+      {incidents.length === 0 && (
+        <Card size="sm" className="border-dashed bg-muted/20">
+          <CardContent className="flex flex-col items-center justify-center gap-1.5 py-10 text-center">
+            <div className="flex size-9 items-center justify-center rounded-full bg-muted">
+              <InboxIcon className="size-4 text-muted-foreground" />
+            </div>
+            <p className="text-sm font-semibold">Nenhum incidente cadastrado</p>
+            <p className="max-w-sm text-xs text-muted-foreground">
+              Quando um incidente chegar, ele aparecerá aqui para triagem.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {incidents.length > 0 && priorityIncidents.length === 0 && (
+        <Card size="sm" className="border-dashed bg-muted/20">
+          <CardContent className="flex items-center gap-3 py-3.5">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/10">
+              <ShieldCheckIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold">
+                Quadro de prioridades vazio
+              </p>
+              <p className="text-[11px] text-muted-foreground">
+                Não há incidentes abertos aguardando triagem.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {priorityIncidents.length > 0 && (
         <section className="space-y-2">
           <div className="flex items-center justify-between gap-2">
@@ -248,137 +288,141 @@ export function CentralView({
         </section>
       )}
 
-      <Card size="sm" className="bg-muted/30">
-        <CardContent className="flex flex-wrap justify-between gap-3">
-          <div className="relative min-w-65 flex-1">
-            <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar por placa, rodovia, ID..."
-              className="pl-9 text-xs"
-            />
+      {incidents.length > 0 && (
+        <>
+          <Card size="sm" className="bg-muted/30">
+            <CardContent className="flex flex-wrap justify-between gap-3">
+              <div className="relative min-w-65 flex-1">
+                <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Buscar por placa, rodovia, ID..."
+                  className="pl-9 text-xs"
+                />
+              </div>
+
+              <div className="flex w-full flex-wrap gap-2">
+                <Select
+                  items={criticality_items}
+                  value={critFilter}
+                  onValueChange={(v) => setCritFilter(v)}
+                >
+                  <SelectTrigger className="w-full min-w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="p-1">
+                    {criticality_items.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  items={category_items}
+                  value={catFilter}
+                  onValueChange={(v) => setCatFilter(v)}
+                >
+                  <SelectTrigger className="w-full min-w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="p-1">
+                    {category_items.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  items={status_items}
+                  value={statusFilter}
+                  onValueChange={(v) => setStatusFilter(v)}
+                >
+                  <SelectTrigger className="w-full min-w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="p-1">
+                    {status_items.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {remainingQueue.map((inc) => {
+              const owner = inc.assigned_to ?? null
+              const otherViewers = owner
+                ? []
+                : [
+                    ...new Set(
+                      getViewersForIncident(inc.id).filter(
+                        (viewer) => viewer !== currentUserName
+                      )
+                    ),
+                  ]
+
+              return (
+                <Card
+                  key={inc.id}
+                  size="sm"
+                  onClick={() => onSelectIncident(inc.id)}
+                  className="cursor-pointer transition-colors hover:bg-border/30"
+                >
+                  <CardHeader>
+                    <div className="flex items-center justify-between gap-2">
+                      <StatusBadge status={inc.status} />
+                      <div className="flex items-center gap-2">
+                        {owner ? (
+                          <Badge
+                            variant="outline"
+                            title={`Em posse de ${owner}`}
+                            aria-label={`Em posse de ${owner}`}
+                            className="gap-1 rounded-sm border-amber-500/30 bg-amber-500/10 px-1.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400"
+                          >
+                            <LockIcon className="size-3" />
+                          </Badge>
+                        ) : otherViewers.length > 0 ? (
+                          <Badge
+                            variant="outline"
+                            title={`Vendo agora: ${otherViewers.join(", ")}`}
+                            aria-label={`Vendo agora: ${otherViewers.join(", ")}`}
+                            className="gap-1 rounded-sm border-sky-500/30 bg-sky-500/10 px-1.5 text-[10px] font-semibold text-sky-600 dark:text-sky-400"
+                          >
+                            <EyeIcon className="size-3" />
+                            <span>{otherViewers.length}</span>
+                          </Badge>
+                        ) : null}
+                        <Badge
+                          variant="secondary"
+                          className="rounded-sm text-[10px] font-bold uppercase"
+                        >
+                          #{inc.id}
+                        </Badge>
+                        <CriticalityBadge criticality={inc.criticality} />
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex flex-col gap-2">
+                    <CardTitle>{inc.title}</CardTitle>
+                    <CardDescription className="text-xs">
+                      {inc.truck.plate} • {inc.location}
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
-
-          <div className="flex w-full flex-wrap gap-2">
-            <Select
-              items={criticality_items}
-              value={critFilter}
-              onValueChange={(v) => setCritFilter(v)}
-            >
-              <SelectTrigger className="w-full min-w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="p-1">
-                {criticality_items.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              items={category_items}
-              value={catFilter}
-              onValueChange={(v) => setCatFilter(v)}
-            >
-              <SelectTrigger className="w-full min-w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="p-1">
-                {category_items.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              items={status_items}
-              value={statusFilter}
-              onValueChange={(v) => setStatusFilter(v)}
-            >
-              <SelectTrigger className="w-full min-w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="p-1">
-                {status_items.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-        {remainingQueue.map((inc) => {
-          const owner = inc.assigned_to ?? null
-          const otherViewers = owner
-            ? []
-            : [
-                ...new Set(
-                  getViewersForIncident(inc.id).filter(
-                    (viewer) => viewer !== currentUserName
-                  )
-                ),
-              ]
-
-          return (
-            <Card
-              key={inc.id}
-              size="sm"
-              onClick={() => onSelectIncident(inc.id)}
-              className="cursor-pointer transition-colors hover:bg-border/30"
-            >
-              <CardHeader>
-                <div className="flex items-center justify-between gap-2">
-                  <StatusBadge status={inc.status} />
-                  <div className="flex items-center gap-2">
-                    {owner ? (
-                      <Badge
-                        variant="outline"
-                        title={`Em posse de ${owner}`}
-                        aria-label={`Em posse de ${owner}`}
-                        className="gap-1 rounded-sm border-amber-500/30 bg-amber-500/10 px-1.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400"
-                      >
-                        <LockIcon className="size-3" />
-                      </Badge>
-                    ) : otherViewers.length > 0 ? (
-                      <Badge
-                        variant="outline"
-                        title={`Vendo agora: ${otherViewers.join(", ")}`}
-                        aria-label={`Vendo agora: ${otherViewers.join(", ")}`}
-                        className="gap-1 rounded-sm border-sky-500/30 bg-sky-500/10 px-1.5 text-[10px] font-semibold text-sky-600 dark:text-sky-400"
-                      >
-                        <EyeIcon className="size-3" />
-                        <span>{otherViewers.length}</span>
-                      </Badge>
-                    ) : null}
-                    <Badge
-                      variant="secondary"
-                      className="rounded-sm text-[10px] font-bold uppercase"
-                    >
-                      #{inc.id}
-                    </Badge>
-                    <CriticalityBadge criticality={inc.criticality} />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-2">
-                <CardTitle>{inc.title}</CardTitle>
-                <CardDescription className="text-xs">
-                  {inc.truck.plate} • {inc.location}
-                </CardDescription>
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
+        </>
+      )}
     </div>
   )
 }
