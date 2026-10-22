@@ -42,3 +42,4 @@ class IncidentUpdate(BaseModel):
     version: int = Field(ge=1)
     status: IncidentStatus | None = None
     assigned_to: str | None = None
+    notes: str | None = None
