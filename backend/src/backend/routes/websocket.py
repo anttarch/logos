@@ -45,7 +45,7 @@ class ConnectionManager:
         for connection in self.active_connections:
             try:
                 await connection.send_json(message)
-            except WebSocketDisconnect, RuntimeError:
+            except (WebSocketDisconnect, RuntimeError):
                 dead.append(connection)
         for d in dead:
             self.disconnect(d)
