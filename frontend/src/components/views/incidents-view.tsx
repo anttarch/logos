@@ -267,7 +267,7 @@ export function IncidentsView({
                   <SelectTrigger id="triage-status" className="w-full text-xs">
                     <SelectValue placeholder="Selecione o resultado" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="p-1">
                     <SelectItem value={IncidentStatus.CLOSED}>
                       Fechado
                     </SelectItem>
