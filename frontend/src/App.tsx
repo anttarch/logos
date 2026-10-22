@@ -4,7 +4,7 @@ import { Navbar } from "@/components/navbar"
 import { Toaster, ToastProvider } from "@/components/ui/toast"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { CentralView } from "@/components/views/central-view"
-import { CrudManagementView } from "@/components/views/crud-management-view"
+import { TestingView } from "@/components/views/testing-view"
 import { SessionView } from "@/components/views/session-view"
 import { useIncidentsData } from "@/hooks/use-incidents-data"
 import { useNavigation } from "@/hooks/use-navigation"
@@ -38,8 +38,16 @@ export function App() {
     saveIncident,
   } = useIncidentsData()
 
-  usePresence({
-    selectedIncidentId,
+  // Presence must mirror what is actually on screen: the incident detail view
+  // only exists while the triage view is active and the user is logged in.
+  // Deriving it from navigation state keeps it correct on browser back/forward.
+  const viewedIncidentId =
+    !showLoginPage && activeView === "triagem" && selectedIncidentId !== null
+      ? selectedIncidentId
+      : null
+
+  const { getViewersForIncident } = usePresence({
+    viewedIncidentId,
     userName: user.name,
     enabled: !showLoginPage,
     onNewIncident: prependIncident,
@@ -48,10 +56,10 @@ export function App() {
 
   const handleLockAndAssume = useCallback(
     async (id: number) => {
-      await lockAndAssume(id)
+      await lockAndAssume(id, user.name)
       setSelectedIncidentId(id)
     },
-    [lockAndAssume, setSelectedIncidentId]
+    [lockAndAssume, setSelectedIncidentId, user.name]
   )
 
   const handleAssumeFromCentral = useCallback(
@@ -92,11 +100,13 @@ export function App() {
                   onAssumeTriage={handleAssumeFromCentral}
                   onLockAndAssume={handleLockAndAssume}
                   onReleaseLock={releaseLock}
+                  getViewersForIncident={getViewersForIncident}
+                  currentUserName={user.name}
                 />
               )}
 
               {activeView === "testes" && (
-                <CrudManagementView
+                <TestingView
                   incidents={incidents}
                   fleet={fleet}
                   onInjectStressLoad={injectStressLoad}

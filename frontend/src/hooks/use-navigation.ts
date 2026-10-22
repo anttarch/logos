@@ -66,8 +66,13 @@ export function useNavigation() {
     const handlePopState = (event: PopStateEvent) => {
       const state = event.state as HistoryNavState | null
       if (state) {
+        // Incident details only exist inside the triage view. Older history
+        // entries may still carry an incident id from another view.
+        const selectedId =
+          state.activeView === "triagem" ? state.selectedIncidentId : null
+
         setActiveView(state.activeView)
-        setSelectedIncidentId(state.selectedIncidentId)
+        setSelectedIncidentId(selectedId)
         setShowLoginPage(state.showLoginPage)
       }
     }
@@ -88,14 +93,12 @@ export function useNavigation() {
 
   const changeView = useCallback(
     (view: ActiveNavView) => {
-      const nextIncidentId = view === "triagem" ? null : selectedIncidentId
-      if (view === "triagem") {
-        setSelectedIncidentId(null)
-      }
+      // Leaving triage closes the incident detail view.
+      setSelectedIncidentId(null)
       setActiveView(view)
-      pushNavState({ activeView: view, selectedIncidentId: nextIncidentId })
+      pushNavState({ activeView: view, selectedIncidentId: null })
     },
-    [pushNavState, selectedIncidentId]
+    [pushNavState]
   )
 
   const selectIncident = useCallback(

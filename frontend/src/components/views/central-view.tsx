@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { InfoIcon, SearchIcon, ZapIcon } from "lucide-react"
+import { EyeIcon, InfoIcon, LockIcon, SearchIcon, ZapIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -36,6 +36,8 @@ interface CentralViewProps {
   onAssumeTriage: (incidentId: number) => void
   onLockAndAssume: (id: number) => void
   onReleaseLock: (id: number) => void
+  getViewersForIncident: (incidentId: number) => string[]
+  currentUserName: string
 }
 
 const criticality_items = [
@@ -72,6 +74,8 @@ export function CentralView({
   onAssumeTriage,
   onLockAndAssume,
   onReleaseLock,
+  getViewersForIncident,
+  currentUserName,
 }: CentralViewProps) {
   const {
     search,
@@ -105,6 +109,8 @@ export function CentralView({
         onBack={() => onSelectIncident(null)}
         onLockAndAssume={onLockAndAssume}
         onReleaseLock={onReleaseLock}
+        getViewersForIncident={getViewersForIncident}
+        currentUserName={currentUserName}
       />
     )
   }
@@ -267,35 +273,68 @@ export function CentralView({
       </Card>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-        {filteredQueue.map((inc) => (
-          <Card
-            key={inc.id}
-            size="sm"
-            onClick={() => onSelectIncident(inc.id)}
-            className="cursor-pointer transition-colors hover:bg-border/30"
-          >
-            <CardHeader>
-              <div className="flex items-center justify-between gap-2">
-                <StatusBadge status={inc.status} />
-                <div className="flex gap-2">
-                  <Badge
-                    variant="secondary"
-                    className="rounded-sm text-[10px] font-bold uppercase"
-                  >
-                    #{inc.id}
-                  </Badge>
-                  <CriticalityBadge criticality={inc.criticality} />
+        {filteredQueue.map((inc) => {
+          const owner = inc.assigned_to ?? null
+          const otherViewers = owner
+            ? []
+            : [
+                ...new Set(
+                  getViewersForIncident(inc.id).filter(
+                    (viewer) => viewer !== currentUserName
+                  )
+                ),
+              ]
+
+          return (
+            <Card
+              key={inc.id}
+              size="sm"
+              onClick={() => onSelectIncident(inc.id)}
+              className="cursor-pointer transition-colors hover:bg-border/30"
+            >
+              <CardHeader>
+                <div className="flex items-center justify-between gap-2">
+                  <StatusBadge status={inc.status} />
+                  <div className="flex items-center gap-2">
+                    {owner ? (
+                      <Badge
+                        variant="outline"
+                        title={`Em posse de ${owner}`}
+                        aria-label={`Em posse de ${owner}`}
+                        className="gap-1 rounded-sm border-amber-500/30 bg-amber-500/10 px-1.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400"
+                      >
+                        <LockIcon className="size-3" />
+                      </Badge>
+                    ) : otherViewers.length > 0 ? (
+                      <Badge
+                        variant="outline"
+                        title={`Vendo agora: ${otherViewers.join(", ")}`}
+                        aria-label={`Vendo agora: ${otherViewers.join(", ")}`}
+                        className="gap-1 rounded-sm border-sky-500/30 bg-sky-500/10 px-1.5 text-[10px] font-semibold text-sky-600 dark:text-sky-400"
+                      >
+                        <EyeIcon className="size-3" />
+                        <span>{otherViewers.length}</span>
+                      </Badge>
+                    ) : null}
+                    <Badge
+                      variant="secondary"
+                      className="rounded-sm text-[10px] font-bold uppercase"
+                    >
+                      #{inc.id}
+                    </Badge>
+                    <CriticalityBadge criticality={inc.criticality} />
+                  </div>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-2">
-              <CardTitle>{inc.title}</CardTitle>
-              <CardDescription className="text-xs">
-                {inc.truck.plate} • {inc.location}
-              </CardDescription>
-            </CardContent>
-          </Card>
-        ))}
+              </CardHeader>
+              <CardContent className="flex flex-col gap-2">
+                <CardTitle>{inc.title}</CardTitle>
+                <CardDescription className="text-xs">
+                  {inc.truck.plate} • {inc.location}
+                </CardDescription>
+              </CardContent>
+            </Card>
+          )
+        })}
       </div>
     </div>
   )

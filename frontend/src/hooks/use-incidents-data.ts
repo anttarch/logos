@@ -6,7 +6,7 @@ import {
   type TruckResponse,
 } from "@/api/model"
 import { toast } from "@/components/ui/toast"
-import type { CrudIncidentFormPayload } from "@/components/views/crud-management-view"
+import type { TestingFormPayload } from "@/components/views/testing-view"
 import { incidentsAPI } from "@/lib/api/incidents"
 import { trucksAPI } from "@/lib/api/trucks"
 import {
@@ -84,7 +84,7 @@ export function useIncidentsData() {
   }, [])
 
   const lockAndAssume = useCallback(
-    async (id: number) => {
+    async (id: number, assignedTo: string) => {
       const target = incidents.find((inc) => inc.id === id)
       if (!target) return
 
@@ -92,6 +92,7 @@ export function useIncidentsData() {
         const updated = await incidentsAPI.updateIncident(id, {
           version: target.version,
           status: IncidentStatus.UNDER_INVESTIGATION,
+          assigned_to: assignedTo,
         })
         replaceIncident(updated)
         toast.add({
@@ -232,7 +233,7 @@ export function useIncidentsData() {
   }, [refreshData])
 
   const saveIncident = useCallback(
-    async (data: CrudIncidentFormPayload, existingId?: number) => {
+    async (data: TestingFormPayload, existingId?: number) => {
       try {
         if (existingId !== undefined) {
           const target = incidents.find((inc) => inc.id === existingId)

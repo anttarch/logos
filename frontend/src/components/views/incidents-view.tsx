@@ -1,4 +1,5 @@
 import { useMemo } from "react"
+import { EyeIcon, LockIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
@@ -9,7 +10,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
-import { IncidentStatus, type IncidentResponse } from "@/api/model"
+import type { IncidentResponse } from "@/api/model"
 import { CriticalityBadge } from "@/components/criticality-badge"
 import { categoryToString, statusToString } from "@/lib/utils"
 import { CategoryIcon } from "@/components/category-icon"
@@ -20,6 +21,14 @@ interface IncidentsViewProps {
   onBack?: () => void
   onLockAndAssume: (id: number) => void
   onReleaseLock: (id: number) => void
+  getViewersForIncident: (incidentId: number) => string[]
+  currentUserName: string
+}
+
+function formatViewers(viewers: string[]): string {
+  if (viewers.length === 1) return `${viewers[0]} está vendo`
+  if (viewers.length === 2) return `${viewers[0]} e ${viewers[1]} estão vendo`
+  return `${viewers[0]} e mais ${viewers.length - 1} estão vendo`
 }
 
 export function IncidentsView({
@@ -28,6 +37,8 @@ export function IncidentsView({
   onBack,
   onLockAndAssume,
   onReleaseLock,
+  getViewersForIncident,
+  currentUserName,
   // onAddNote,
 }: IncidentsViewProps) {
   // const [noteInput, setNoteInput] = useState("")
@@ -39,6 +50,18 @@ export function IncidentsView({
       null,
     [incidents, selectedIncidentId]
   )
+
+  const otherViewers = useMemo(() => {
+    if (!selectedIncident) return []
+
+    return [
+      ...new Set(
+        getViewersForIncident(selectedIncident.id).filter(
+          (viewer) => viewer !== currentUserName
+        )
+      ),
+    ]
+  }, [currentUserName, getViewersForIncident, selectedIncident])
 
   // const handleSubmitNote = () => {
   //   const trimmed = noteInput.trim()
@@ -70,8 +93,8 @@ export function IncidentsView({
     },
   ]
 
-  const isUnderInvestigation =
-    selectedIncident.status === IncidentStatus.UNDER_INVESTIGATION
+  const owner = selectedIncident.assigned_to ?? null
+  const isOwnedByCurrentUser = owner === currentUserName
 
   return (
     <div className="space-y-6">
@@ -91,9 +114,9 @@ export function IncidentsView({
         </Breadcrumb>
       )}
 
-      <div className="mt-1 flex flex-row gap-3.5 border-b">
+      <div className="mt-1 flex flex-row items-start gap-3.5 border-b">
         <CategoryIcon category={selectedIncident.category} />
-        <div className="flex flex-col gap-1.5 pb-6">
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5 pb-6">
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             {selectedIncident.title}
           </h1>
@@ -107,6 +130,26 @@ export function IncidentsView({
             </Badge>
           </div>
         </div>
+
+        {owner ? (
+          <Badge
+            variant="outline"
+            title={`Em posse de ${owner}`}
+            className="mt-1 hidden shrink-0 items-center gap-1.5 rounded-full border-amber-500/30 bg-amber-500/10 text-[11px] font-medium text-amber-600 sm:inline-flex dark:text-amber-400"
+          >
+            <LockIcon className="size-3.5" />
+            <span>{isOwnedByCurrentUser ? "Seu lock" : owner}</span>
+          </Badge>
+        ) : otherViewers.length > 0 ? (
+          <Badge
+            variant="outline"
+            title={otherViewers.join(", ")}
+            className="mt-1 hidden shrink-0 items-center gap-1.5 rounded-full bg-muted/40 text-[11px] font-medium text-muted-foreground sm:inline-flex"
+          >
+            <EyeIcon className="size-3.5" />
+            <span>{formatViewers(otherViewers)}</span>
+          </Badge>
+        ) : null}
       </div>
 
       <div className="space-y-3">
@@ -201,18 +244,20 @@ export function IncidentsView({
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-2 border-t pt-4">
+        {isOwnedByCurrentUser && (
+          <Button
+            variant="destructive"
+            size="lg"
+            className="text-xs"
+            onClick={() => onReleaseLock(selectedIncident.id)}
+          >
+            Liberar Lock do Incidente
+          </Button>
+        )}
         <Button
-          variant="destructive"
           size="lg"
           className="text-xs"
-          onClick={() => onReleaseLock(selectedIncident.id)}
-        >
-          Liberar Lock do Incidente
-        </Button>
-        <Button
-          size="lg"
-          className="text-xs"
-          disabled={isUnderInvestigation}
+          disabled={owner !== null}
           onClick={() => onLockAndAssume(selectedIncident.id)}
         >
           Assumir Incidente
