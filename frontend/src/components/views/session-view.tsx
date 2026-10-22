@@ -16,19 +16,28 @@ interface SessionViewProps {
 }
 
 export function SessionView({ user, onStart: onStart }: SessionViewProps) {
-  const [nameInput, setNameInput] = useState(user.name)
+  const [nameInput, setNameInput] = useState("")
+
+  const trimmedName = nameInput.trim()
 
   const handleSubmit = (e: SubmitEvent) => {
     e.preventDefault()
-    const trimmed = nameInput.trim() || "Larissa Rocha"
+    if (!trimmedName) {
+      toast.add({
+        type: "error",
+        description: "Informe seu nome para iniciar a sessão.",
+      })
+      return
+    }
+
     onStart({
       ...user,
-      name: trimmed,
+      name: trimmedName,
       role: UserRole.ANALYST,
     })
     toast.add({
       type: "success",
-      description: `Sessão iniciada como ${trimmed}.`,
+      description: `Sessão iniciada como ${trimmedName}.`,
     })
   }
 
@@ -40,7 +49,7 @@ export function SessionView({ user, onStart: onStart }: SessionViewProps) {
     })
     toast.add({
       type: "success",
-      description: "Modo Supervisor ativado.",
+      description: `Modo Supervisor ativado.`,
     })
   }
 
@@ -72,7 +81,12 @@ export function SessionView({ user, onStart: onStart }: SessionViewProps) {
                   placeholder="Digite o nome completo"
                 />
               </Field>
-              <Button type="submit" size="lg" className="w-full sm:w-auto">
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full sm:w-auto"
+                disabled={!trimmedName}
+              >
                 <CheckIcon className="size-4" />
                 <span>Iniciar Triagem</span>
               </Button>
