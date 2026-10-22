@@ -94,11 +94,13 @@ export function useNavigation() {
 
   const changeView = useCallback(
     (view: ActiveNavView) => {
+      if (view === "testes" && user.role !== UserRole.SUPERVISOR) return
+
       setSelectedIncidentId(null)
       setActiveView(view)
       pushNavState({ activeView: view, selectedIncidentId: null })
     },
-    [pushNavState]
+    [pushNavState, user.role]
   )
 
   const selectIncident = useCallback(

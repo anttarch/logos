@@ -8,7 +8,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import type { UserSession } from "@/types/session"
+import { UserRole, type UserSession } from "@/types/session"
 
 export type ActiveNavView = "triagem" | "fila-critica" | "testes"
 
@@ -25,6 +25,7 @@ interface NavbarProps {
 export function Navbar({
   activeView = "triagem",
   onViewChange,
+  user,
   onLogOut: onLogOut,
   minimal = false,
   isConnected = false,
@@ -57,14 +58,16 @@ export function Navbar({
               >
                 <span>Triagem</span>
               </Button>
-              <Button
-                variant={activeView === "testes" ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => onViewChange("testes")}
-                className="text-xs"
-              >
-                Testes
-              </Button>
+              {user?.role === UserRole.SUPERVISOR && (
+                <Button
+                  variant={activeView === "testes" ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => onViewChange("testes")}
+                  className="text-xs"
+                >
+                  Testes
+                </Button>
+              )}
             </nav>
           )}
         </div>

@@ -9,6 +9,7 @@ import { SessionView } from "@/components/views/session-view"
 import { useIncidentsData } from "@/hooks/use-incidents-data"
 import { useNavigation } from "@/hooks/use-navigation"
 import { usePresence } from "@/hooks/use-presence"
+import { UserRole } from "@/types/session"
 
 export function App() {
   const {
@@ -24,10 +25,10 @@ export function App() {
     openLoginPage,
     closeLoginPage,
   } = useNavigation()
-
-  // Without a name there is no session. This also blocks restoring an
-  // authenticated page through browser back/forward after logging out.
   const requiresLogin = showLoginPage || user.name.trim() === ""
+  const canAccessTesting = user.role === UserRole.SUPERVISOR
+  const visibleView =
+    activeView === "testes" && !canAccessTesting ? "triagem" : activeView
 
   const {
     incidents,
@@ -47,7 +48,7 @@ export function App() {
   // only exists while the triage view is active and the user is logged in.
   // Deriving it from navigation state keeps it correct on browser back/forward.
   const viewedIncidentId =
-    !requiresLogin && activeView === "triagem" && selectedIncidentId !== null
+    !requiresLogin && visibleView === "triagem" && selectedIncidentId !== null
       ? selectedIncidentId
       : null
 
@@ -80,7 +81,7 @@ export function App() {
       <ToastProvider>
         <div className="flex min-h-svh flex-col justify-between bg-background text-foreground antialiased">
           <Navbar
-            activeView={activeView}
+            activeView={visibleView}
             onViewChange={changeView}
             user={user}
             onLogOut={openLoginPage}
@@ -98,7 +99,7 @@ export function App() {
             />
           ) : (
             <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
-              {activeView === "triagem" && (
+              {visibleView === "triagem" && (
                 <CentralView
                   incidents={incidents}
                   selectedIncidentId={selectedIncidentId}
@@ -112,7 +113,7 @@ export function App() {
                 />
               )}
 
-              {activeView === "testes" && (
+              {visibleView === "testes" && canAccessTesting && (
                 <TestingView
                   incidents={incidents}
                   fleet={fleet}
