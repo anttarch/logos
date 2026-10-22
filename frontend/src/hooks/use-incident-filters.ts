@@ -1,4 +1,4 @@
-import * as React from "react"
+import { useCallback, useMemo, useState } from "react"
 import type {
   IncidentCategory,
   IncidentCriticality,
@@ -23,17 +23,12 @@ export function matchesIncidentQuery(
 }
 
 export function useIncidentFilters(incidents: IncidentResponse[]) {
-  const [search, setSearch] = React.useState("")
-  const [critFilter, setCritFilter] =
-    React.useState<IncidentCriticality | null>(null)
-  const [catFilter, setCatFilter] = React.useState<IncidentCategory | null>(
-    null
-  )
-  const [statusFilter, setStatusFilter] = React.useState<IncidentStatus | null>(
-    null
-  )
+  const [search, setSearch] = useState("")
+  const [critFilter, setCritFilter] = useState<IncidentCriticality | null>(null)
+  const [catFilter, setCatFilter] = useState<IncidentCategory | null>(null)
+  const [statusFilter, setStatusFilter] = useState<IncidentStatus | null>(null)
 
-  const filteredIncidents = React.useMemo(() => {
+  const filteredIncidents = useMemo(() => {
     return incidents.filter((inc) => {
       const matchSearch = matchesIncidentQuery(inc, search)
       const matchCrit = critFilter == null || inc.criticality === critFilter
@@ -43,7 +38,7 @@ export function useIncidentFilters(incidents: IncidentResponse[]) {
     })
   }, [incidents, search, critFilter, catFilter, statusFilter])
 
-  const resetFilters = React.useCallback(() => {
+  const resetFilters = useCallback(() => {
     setSearch("")
     setCritFilter(null)
     setCatFilter(null)

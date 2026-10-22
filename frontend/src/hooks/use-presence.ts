@@ -1,4 +1,4 @@
-import * as React from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import type { IncidentResponse } from "@/api/model"
 import { API_BASE } from "@/lib/api/common"
 
@@ -45,25 +45,25 @@ export function usePresence({
   onNewIncident,
   onPatchIncident,
 }: UsePresenceOptions) {
-  const [activeViewers, setActiveViewers] = React.useState<ActiveViewersMap>({})
-  const [isConnected, setIsConnected] = React.useState(false)
+  const [activeViewers, setActiveViewers] = useState<ActiveViewersMap>({})
+  const [isConnected, setIsConnected] = useState(false)
 
-  const wsRef = React.useRef<WebSocket | null>(null)
+  const wsRef = useRef<WebSocket | null>(null)
   // Incident the server currently believes this user is viewing.
-  const announcedIncidentRef = React.useRef<number | null>(null)
+  const announcedIncidentRef = useRef<number | null>(null)
   // Incident the UI currently wants to announce (kept in a ref so a socket
   // that opens later/reconnects can announce the latest view).
-  const viewedIncidentRef = React.useRef<number | null>(viewedIncidentId)
+  const viewedIncidentRef = useRef<number | null>(viewedIncidentId)
 
-  const onNewIncidentRef = React.useRef(onNewIncident)
-  const onPatchIncidentRef = React.useRef(onPatchIncident)
+  const onNewIncidentRef = useRef(onNewIncident)
+  const onPatchIncidentRef = useRef(onPatchIncident)
 
-  React.useEffect(() => {
+  useEffect(() => {
     onNewIncidentRef.current = onNewIncident
     onPatchIncidentRef.current = onPatchIncident
   }, [onNewIncident, onPatchIncident])
 
-  const sendEvent = React.useCallback(
+  const sendEvent = useCallback(
     (
       ws: WebSocket,
       event: "START_VIEW" | "END_VIEW",
@@ -82,7 +82,7 @@ export function usePresence({
     []
   )
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!enabled) return
 
     let disposed = false
@@ -167,7 +167,7 @@ export function usePresence({
     }
   }, [enabled, userName, sendEvent])
 
-  React.useEffect(() => {
+  useEffect(() => {
     viewedIncidentRef.current = viewedIncidentId
 
     const ws = wsRef.current
@@ -187,7 +187,7 @@ export function usePresence({
     }
   }, [viewedIncidentId, userName, sendEvent])
 
-  const getViewersForIncident = React.useCallback(
+  const getViewersForIncident = useCallback(
     (incidentId: number): string[] => {
       return activeViewers[incidentId] ?? []
     },
