@@ -87,6 +87,8 @@ export function TestingView({
     setCritFilter,
     catFilter,
     setCatFilter,
+    statusFilter,
+    setStatusFilter,
     filteredIncidents,
   } = useIncidentFilters(incidents)
   const [fleetSearch, setFleetSearch] = useState("")
@@ -344,8 +346,8 @@ export function TestingView({
               <div className="w-full sm:w-48">
                 <Select
                   items={status_items}
-                  value={formStatus}
-                  onValueChange={(v) => setFormStatus(v as IncidentStatus)}
+                  value={statusFilter}
+                  onValueChange={(v) => setStatusFilter(v as IncidentStatus)}
                 >
                   <SelectTrigger className="w-full text-xs">
                     <SelectValue />

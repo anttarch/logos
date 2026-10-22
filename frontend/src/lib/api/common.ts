@@ -1,4 +1,9 @@
-export const API_BASE = import.meta.env.BACKEND_URL || "http://localhost:8000"
+const configuredApiBase = import.meta.env.VITE_BACKEND_URL?.trim()
+
+export const API_BASE = (configuredApiBase || "http://localhost:8000").replace(
+  /\/+$/,
+  ""
+)
 
 async function fetchTimeout(
   url: string,
