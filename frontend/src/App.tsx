@@ -25,6 +25,10 @@ export function App() {
     closeLoginPage,
   } = useNavigation()
 
+  // Without a name there is no session. This also blocks restoring an
+  // authenticated page through browser back/forward after logging out.
+  const requiresLogin = showLoginPage || user.name.trim() === ""
+
   const {
     incidents,
     fleet,
@@ -43,14 +47,14 @@ export function App() {
   // only exists while the triage view is active and the user is logged in.
   // Deriving it from navigation state keeps it correct on browser back/forward.
   const viewedIncidentId =
-    !showLoginPage && activeView === "triagem" && selectedIncidentId !== null
+    !requiresLogin && activeView === "triagem" && selectedIncidentId !== null
       ? selectedIncidentId
       : null
 
   const { getViewersForIncident } = usePresence({
     viewedIncidentId,
     userName: user.name,
-    enabled: !showLoginPage,
+    enabled: !requiresLogin,
     onNewIncident: prependIncident,
     onPatchIncident: replaceIncident,
   })
@@ -81,10 +85,10 @@ export function App() {
             user={user}
             onLogOut={openLoginPage}
             criticalUnattendedCount={criticalUnattendedCount}
-            minimal={showLoginPage}
+            minimal={requiresLogin}
           />
 
-          {showLoginPage ? (
+          {requiresLogin ? (
             <SessionView
               user={user}
               onStart={startTriageSession}

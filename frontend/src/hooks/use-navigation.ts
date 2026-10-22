@@ -110,8 +110,17 @@ export function useNavigation() {
   )
 
   const openLoginPage = useCallback(() => {
+    // Logging out closes the session completely: next login starts at the
+    // main triage page, with no incident selected and no previous identity.
+    setUser(INITIAL_USER)
+    setActiveView("triagem")
+    setSelectedIncidentId(null)
     setShowLoginPage(true)
-    pushNavState({ showLoginPage: true })
+    pushNavState({
+      activeView: "triagem",
+      selectedIncidentId: null,
+      showLoginPage: true,
+    })
   }, [pushNavState])
 
   const closeLoginPage = useCallback(() => {
