@@ -294,6 +294,7 @@ export function useIncidentsData() {
             {
               version: target.version,
               status: data.status,
+              notes: data.notes ?? "",
             }
           )
           replaceIncident(updatedIncident)
