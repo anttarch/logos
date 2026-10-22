@@ -54,7 +54,6 @@ export function IncidentsView({
   onFinishTriage,
   getViewersForIncident,
   currentUserName,
-  // onAddNote,
 }: IncidentsViewProps) {
   const selectedIncident = useMemo(
     () =>

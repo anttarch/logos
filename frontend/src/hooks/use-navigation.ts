@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import type { ActiveNavView } from "@/components/navbar"
-import { INITIAL_USER, type UserSession } from "@/types/session"
+import { UserRole, type UserSession } from "@/types/session"
 
 interface HistoryNavState {
   activeView: ActiveNavView
@@ -32,7 +32,10 @@ export function useNavigation() {
   const [selectedIncidentId, setSelectedIncidentId] = useState<number | null>(
     null
   )
-  const [user, setUser] = useState<UserSession>(INITIAL_USER)
+  const [user, setUser] = useState<UserSession>({
+    name: "",
+    role: UserRole.ANALYST,
+  })
 
   const pushNavState = useCallback(
     (next: Partial<HistoryNavState>) => {
@@ -66,8 +69,6 @@ export function useNavigation() {
     const handlePopState = (event: PopStateEvent) => {
       const state = event.state as HistoryNavState | null
       if (state) {
-        // Incident details only exist inside the triage view. Older history
-        // entries may still carry an incident id from another view.
         const selectedId =
           state.activeView === "triagem" ? state.selectedIncidentId : null
 
@@ -93,7 +94,6 @@ export function useNavigation() {
 
   const changeView = useCallback(
     (view: ActiveNavView) => {
-      // Leaving triage closes the incident detail view.
       setSelectedIncidentId(null)
       setActiveView(view)
       pushNavState({ activeView: view, selectedIncidentId: null })
@@ -110,9 +110,7 @@ export function useNavigation() {
   )
 
   const openLoginPage = useCallback(() => {
-    // Logging out closes the session completely: next login starts at the
-    // main triage page, with no incident selected and no previous identity.
-    setUser(INITIAL_USER)
+    setUser({ name: "", role: UserRole.ANALYST })
     setActiveView("triagem")
     setSelectedIncidentId(null)
     setShowLoginPage(true)
